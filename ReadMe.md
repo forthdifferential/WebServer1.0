@@ -20,15 +20,15 @@ make
 ## Usage
 ````
 ./WEBSERVER -p  port_number  -s  subreactor_number  -l  log_file_path(start with ./)
-````-p 9899 -s 10 -l ./ss
-
+````-p 9899 -s 10 -l ./log/log.txt
+````
 ## Test
 
 webbench-1.5
 
 ````
 ./webbench -c 1000  -t  30   http://192.168.31.128:18888/index.html
-
+````
 ## Technical points
 
 * 使用边沿触发的Epoll多路复用技术,并使用多Reactor多线程模型。
