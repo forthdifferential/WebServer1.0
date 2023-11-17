@@ -6,14 +6,14 @@
 #include "Chanel.h"
 #include "ThreadPool.h"
 
-// Server* Server::service_ = nullptr;
-std::shared_ptr<Server> Server::service_ = nullptr;
+Server* Server::service_ = nullptr; // 定义必须写在.cpp文件中
+// std::shared_ptr<Server> Server::service_ = nullptr;
 std::mutex Server::init_lock_{};
 
 Server::Server(int pot, EventLoop *mr, ThreadPool *tp):
                     port_(pot),listenfd_(BindAndListen(port_)),
                     Server_main_reactor_(mr),Server_threadpool_(tp),
-                    listen_chanel_(new Chanel(listenfd_,false)) //监听chanel，不是连接
+                    listen_chanel_(new Chanel(listenfd_,false)) // 监听chanel，不是连接
 {
     std::cout<<"listenfd_ is: "<<listenfd_<<std::endl;
 
@@ -27,9 +27,9 @@ Server::~Server()
     //考虑
     /**
      * 资源管理的原则是需要留意带指针的对象！资源管理整理：
-     * static std::shared_ptr<Server> service_              主函数分配，智能指针
+     * static Server* service_                              主函数分配，主函数管理
      * Chanel* listen_chanel_                               Chanel由Reactor管理，有两种途径，分别是：Reactor中DELChanel函数删除，以及 Reactor析构时（调用DeleteChanel
-     * ThreadPool* Server_threadpool_                       主函数分配 ，智能指针
+     * std::shared_ptr<ThreadPool> Server_threadpool_       主函数分配 ，智能指针
      * std::vector<std::shared_ptr<EventLoop>> subReactors_ 智能指针
      * 
     */
@@ -88,7 +88,7 @@ void Server::CONNisComing()
     struct sockaddr_in caddr;
     socklen_t caddr_len = sizeof(caddr);
     
-    //ET模式，单次触发必须接受完整的请求，所以用while -- 错的
+    //ET模式，单次触发必须接受完整的请求，使用while循环将accept包住，保证一个可读事件来临，处理完全部的连接请求
     //server不停接受socket连接请求
     while(true){
         int connfd = accept(listenfd_,reinterpret_cast<struct sockaddr*>(&caddr),&caddr_len);
@@ -115,7 +115,7 @@ void Server::CONNisComing()
             return;
         }
 
-        //因为是数据量不大，实时性要求比较高，关闭Nagle算法
+        //因为是数据量不大，实时性要求比较高，关闭Nagle算法。 Nagle算法通过减少需要传输的数据包，来优化网络
         int enable = 1;
         if((setsockopt(connfd,IPPROTO_TCP,TCP_NODELAY,&enable,sizeof(enable))) == -1){
             Getlogger()->error("failed to failed to set TCP_NODELAY on connfd(Nagel algrithem)");
@@ -125,8 +125,9 @@ void Server::CONNisComing()
 
         //建立连接后，分发任务给subReactor(找连接数量最小的subReactor)
         //重点：仔细考虑如何分发才能负载均衡？？？
-        //需要改进，这里的选法很不好，而且选的过程中负载实时变化
-        int least_conn_num=INT32_MAX,idx=0;
+        // 此时 找连接数量最小的subReactor
+        // 考虑之后需要改进，选的过程中负载实时变化
+        int least_conn_num=INT32_MAX, idx=0;
         for(int i=0;i<subReactors_.size();++i)
         {
             if(subReactors_[i]->Get_conNum() < least_conn_num)

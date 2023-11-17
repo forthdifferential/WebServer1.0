@@ -8,17 +8,18 @@
 #include "EventLoop.h"
 
 
-//写成全局的，唯一，方便调用
-static std::shared_ptr<Server> main_server;
+// 写成全局的，唯一，方便调用
+// static std::shared_ptr<Server> main_server;
+static Server* main_server;
 
 /*信号处理线程工作函数*/
 static void sig_thread_call(void* set){
     
-    sigset_t* sigset = reinterpret_cast<sigset_t*>(set);//指针类型转换
+    sigset_t* sigset = reinterpret_cast<sigset_t*>(set);// 指针类型转换
     bool isStop = false;
     int ret, sig;
     while(!isStop){
-        //阻塞的等待之前加入阻塞信号集那三个信号
+        // 阻塞的等待之前加入阻塞信号集那三个信号
         ret = sigwait(sigset,&sig);
         if(ret != 0){
             Getlogger()->error("sigwait error: {}", strerror(ret));
@@ -36,11 +37,11 @@ static void sig_thread_call(void* set){
             exit(0);
         }
            break;   
-        case SIGALRM:{ // 时间走一个槽
-           
+        case SIGALRM:{ 
+           // 时间走一个槽, 通知所有subReactor定时器检验
             auto tick1s = main_server->timeWheel_PipeOfWrite_;
             for(auto& it: tick1s){
-                //随便写点消息在tick的写端，触发EPOLLIN，通知所有Reactor
+                // 随便写点消息在tick的写端，触发EPOLLIN，通知所有Reactor
                 const char* msg = "tick\0";
                 int ret = Write_to_fd(it,msg,strlen(msg));               
                 if(ret == -1){
@@ -69,7 +70,7 @@ int main(int argc, char* argv[]){
 
     /*解析命令行参数*/
     // 3-23 bug 端口号0-1014是root用户用的
-    auto res = parseCommandLine(argc,argv);
+    auto res = parseCommandLine(argc, argv);
     if(res == std::nullopt){
         std::cout<<"The command line is wrong! "<<std::endl;
         std::cout<<"Please use the form :: ./server -p Port -s SubReactorSize -l LogPath(start with ./)"<<std::endl;
@@ -97,30 +98,28 @@ int main(int argc, char* argv[]){
     //SIGPIPE、SIGALRM、SIGTERM信号将被阻塞，不会中断线程处理的过程。
     if(pthread_sigmask(SIG_BLOCK,&set,NULL) != 0 ){
         std::cout<<"Failed to mask the signal in the main function ! "<<std::endl;
-        std::cout<<"errno: "<<errno<<std::endl; // c++中errno无需在声明头文件
+        std::cout<<"errno: "<< errno<< std::endl; // c++中errno无需在声明头文件
         return 0;
     }
 
     /*分一个线程用作信号处理*/
-    std::thread Sig_thread(sig_thread_call,&set);
+    std::thread Sig_thread(sig_thread_call, &set);
     Sig_thread.detach();
 
     /*线程池初始化,注意信号线程和主线程不在线程池*/
     auto main_thread_pool = std::make_shared<ThreadPool>(static_cast<size_t>(std::get<1>(*res)));
-    //shared_ptr<ThreadPool*> main_thread_pool = make_shared<ThreadPool*> ThreadPool((size_t)(std::get<1>(*res)));
-
     
-    //单例模式
+    // 单例模式
     auto main_reactor = std::make_shared<EventLoop>(true);
-    main_server = Server::Get_the_service(std::get<0>(*res),main_reactor.get(),main_thread_pool.get());
+    main_server = Server::Get_the_service(std::get<0>(*res), main_reactor.get(), main_thread_pool.get());
 
     /*服务器开始运行*/
     main_server->Server_Start();
 
-    //时间轮推动信号 按照时间轮的粒度推动
+    // 时间轮推动信号 按照时间轮的粒度推动
     alarm(GlobalValue::TimerWheelResolution);
 
-    //主reactor开始接收和分发
+    // 主reactor开始接收和分发
     main_reactor->StartLoop();
     return 0;
 }

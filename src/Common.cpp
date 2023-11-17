@@ -99,10 +99,9 @@ std::shared_ptr<spdlog::logger> Getlogger(std::string path)
 
 int RecvData(int fd, std::string &read_buf, bool &is_over)
 {
-    //考虑是总缓冲区，我先放在外面试试
+
     int read_sum = 0;
-    // char buf[GlobalValue::BufferMaxSIze];
-    // memset(buf,'\0',sizeof(buf));
+
     //ET模式，一次性读取
     /**
     对非阻塞I/O：
@@ -232,6 +231,7 @@ std::optional<std::tuple<int, int, std::string>> parseCommandLine(int argc, char
     int res;
     unsigned int port, subReactorSize;
     std::string log_path;
+    // 解析命令行./server -p Port -s SubReactorSize -l LogPath(start with ./)
     while((res = getopt(argc,argv,str)) != -1){
         switch (res)
         {
@@ -244,8 +244,8 @@ std::optional<std::tuple<int, int, std::string>> parseCommandLine(int argc, char
             assert(subReactorSize > 0);
             break;;
         case 'l':{
-            std::regex PathExpression(R"(^\.\/\S*)");   //匹配./开头字符串，提取log文件路径
-            std::smatch matchRes{};     //正则匹配结果 内部是vector，存储了所有匹配的对象
+            std::regex PathExpression(R"(^\.\/\S*)");   // 匹配./开头字符串，提取log文件路径
+            std::smatch matchRes{};     // 正则匹配结果 内部是vector，存储了所有匹配的对象
             std::string path(optarg);
             if(!std::regex_match(path,matchRes,PathExpression)){
                 std::cout <<"ilegal log path\n"<<std::endl;

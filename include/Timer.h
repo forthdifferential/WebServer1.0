@@ -18,12 +18,11 @@ class Timer
 {
 private:
     typedef std::function<void()> CALLBACK;
-    CALLBACK funcofTimeUp_;             //超时回调函数
-    size_t  posInWheel_;                //位于时间轮的哪个槽
-    size_t  turns_;                     //剩余多少圈
+    CALLBACK funcofTimeUp_;             // 超时回调函数
+    size_t  posInWheel_;                // 位于时间轮的哪个槽
+    size_t  turns_;                     // 剩余多少圈
 public:
     Timer(size_t pos,size_t turns);
-    //TOD 重载func初始化的构造函数？ 先分开，不写
 
     friend class TimeWheel;
     
@@ -48,15 +47,15 @@ private:
 class TimeWheel
 {
 private:
-    std::vector<std::list<Timer*>> slot_;   //时间轮的槽,每个槽一个链表
-    size_t sizeofTW_;                       //一共几个槽
-    size_t CurPos_;                         //初始在第0个槽
-    std::chrono::seconds tick_size_;        //时间粒度
+    std::vector<std::list<Timer*>> slot_;   // 时间轮的槽,每个槽一个链表
+    size_t sizeofTW_;                       // 一共几个槽
+    size_t CurPos_;                         // 初始在第0个槽
+    std::chrono::seconds tick_size_;        // 时间粒度
 
-    Chanel* tick_chanel;                    //监听tick[0]事件的chanel
-    int tick_pfd_[2]{};                     //管道fd，timewheel拿到读端，监听写端发来的tick信号
+    Chanel* tick_chanel;                    // 监听tick[0]事件的chanel
+    int tick_pfd_[2]{};                     // 管道fd，timewheel拿到读端，监听写端发来的tick信号
 private:
-    void tick(); //，执行当前定时器，并推进时间轮到下一个槽
+    void tick(); // 执行当前定时器，并推进时间轮到下一个槽
 public:
     TimeWheel(size_t maxsize = 12);
     TimeWheel(const TimeWheel& wheel) = delete;
@@ -69,7 +68,7 @@ public:
 
     
     Chanel* Get_tickChanel() const  {return tick_chanel;};
-    int     Get_1tick()      const  {return tick_pfd_[1];};   //获取写端函数
+    int     Get_1tick()      const  {return tick_pfd_[1];};   // 获取写端函数
 };
 
 #endif

@@ -217,14 +217,14 @@ void EventLoop::Listen_and_Call()
         //     continue;
         // }
 
-        for(int i = 0;i < number; ++i){
+        for(int i = 0; i < number; ++i){
             int sockfd = events_[i].data.fd;
             //Chanel*&，指向指针的引用，直接修改对象
             auto& cur_chanel = chanelpool_[sockfd];
 
             //如果是在chanelpool中的已注册事件；
-            //3-16 还没看前置注册，这里我猜是收到HTTP请求就存入chanel
-            //其实subReactor的chanelpool里的chanel是mainReactor分发的时候注册的
+            //subReactor的chanelpool里的chanel是mainReactor分发的时候注册的
+            //mianReactor里的chanel只有监听新连接的listen_chanel_
             if(cur_chanel)
             {
                 //拿到就设置已经处理，然后去处理它

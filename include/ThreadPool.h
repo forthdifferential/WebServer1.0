@@ -36,7 +36,7 @@ template<class F,class ...Args>
 //后缀指定返回类型，typename来告知编译器它是一个类型名，std::result_of<F(Args...)>将推导出函数F的返回类型。
 auto ThreadPool::Add_task(F&& f,Args&& ...args) ->std::future<typename std::result_of<F(Args...)>::type> // 或者写成 -> std::future<decltype(f(args...))>
 {
-    using ReturnType = typename std::result_of<F(Args...)>::type;//注意加typename ，嵌套从属类型
+    using ReturnType = typename std::result_of<F(Args...)>::type; // 注意加typename ，嵌套从属类型
     /*
     在这个语句中，std::forward 用于完美转发参数，确保参数按照原始类型（左值或右值）传递给 std::bind 函数。
     这样做的目的是在 std::bind 调用中保持完美转发，避免不必要的值拷贝，从而提高效率和性能。

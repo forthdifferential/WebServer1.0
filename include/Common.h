@@ -21,13 +21,13 @@ class GlobalValue
 {
     //静态变量初始化0
 public:
-    static int TimerWheelResolution;    //时间轮粒度 一个槽的时间
-    static const int MaxConnNumber = 100000;           //最大连接树
-    static int BufferMaxSIze;           // 读数据，最大缓冲区大小
+    static int TimerWheelResolution;                    // 时间轮粒度 一个槽的时间
+    static const int MaxConnNumber = 100000;            // 最大连接树
+    static int BufferMaxSIze;                           // 读数据，最大缓冲区大小
 
-    static std::chrono::seconds HttpHeadTime;       // TCP连接建立后，必须在该时间内接受完整的请求行和首部，否则超时
-    static std::chrono::seconds HttpPostBodyTime;   // post报文，相邻报文到达时间的最大间隔
-    static std::chrono::seconds KeepAliveTime;      // 长连接的超时时间
+    static std::chrono::seconds HttpHeadTime;           // TCP连接建立后，必须在该时间内接受完整的请求行和首部，否则超时
+    static std::chrono::seconds HttpPostBodyTime;       // post报文，相邻报文到达时间的最大间隔
+    static std::chrono::seconds KeepAliveTime;          // 长连接的超时时间
     static char Favicon[555];
 private:
     static int CurConnNumber;
@@ -74,10 +74,10 @@ int Write_to_fd(int fd,const char* content,int length);
 */
 int  Read_from_fd(int fd,const char* buf,int length);
 
-//解析命令行参数
+// 解析命令行参数
 std::optional<std::tuple<int,int,std::string>>  parseCommandLine(int argc, char* argv[]);
 
-//设置fd非阻塞
+// 设置fd非阻塞
 int setnoblocking(int fd);
 
 //socket 创建(设置端口复用)绑定监听

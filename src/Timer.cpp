@@ -33,8 +33,7 @@ TimeWheel::TimeWheel(size_t maxsize):
 
     tick_chanel = new Chanel(tick_pfd_[0],false);
     tick_chanel->Set_events(EPOLLIN);
-    //3-16 此处设置值传递？tick()应该会改变时间轮的参数
-    //3-22 改为传this指针
+
     tick_chanel->Register_Rdhandle([this]{tick();});
 
 }
@@ -106,13 +105,13 @@ bool TimeWheel::TimeWheel_Adjust_Timer(Timer *timer, std::chrono::seconds timeou
     return true;
 }
 
-//有问题 
+
 void TimeWheel::tick()
 {
     char buf[128];
     int ret = Read_from_fd(tick_pfd_[0],buf,strlen("tick\0"));
     if(ret <= 0){
-         Getlogger()->error("in tick ,read data to buffer error {} ，ret={}", strerror(errno),ret);
+         Getlogger()->error("in tick, read data to buffer error {}, ret={}", strerror(errno),ret);
         return;
     }
 
@@ -130,10 +129,8 @@ void TimeWheel::tick()
         }else{
             
             auto next = ++it;
-            p->ExecuteFunc();                  //关闭连接 删除时间 删除定时器
-            //timer执行ExecuteFunc()后删除了，只需要链表下移一个位置就行
-            //it =next;
-            it = next;
+            p->ExecuteFunc(); // 关闭连接 删除时间 删除定时器                 
+            it = next; // timer执行ExecuteFunc()后删除了，只需要链表下移一个位置就行
         }
 
     }

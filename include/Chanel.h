@@ -6,18 +6,18 @@
 #include "EventLoop.h"
 #include <stdint.h>
 
-//管道端的数据类
-//对fd事件相关方法的封装,有了Channel就有了fd及其对应的事件处理方法
+// 管道端的数据类
+// 对fd事件相关方法的封装,有了Channel就有了fd及其对应的事件处理方法
 class Chanel
 {
 private:
     int fd_;
     bool isConnect_;
     __uint32_t events_;     // 感兴趣的事件集
-    __uint32_t revents_;   // 就绪的事件集(现在就要去处理了) 
+    __uint32_t revents_;   // 就绪的事件集 (现在就要去处理了) 
 
     HttpData* holder_ = nullptr;
-    using CALLBACK = std::function<void()>;
+    using CALLBACK = std::function<void()>; // 函数对象类型，默认是空的std::function
     CALLBACK read_handle;
     CALLBACK write_handle;
     CALLBACK error_handle;
@@ -40,7 +40,7 @@ public:
     void Register_Erhandle(CALLBACK func)       {error_handle = std::move(func);};
     void Register_Dishandle(CALLBACK func)      {disconn_handle = std::move(func);};
 
-    void CallRevents();
+    void CallRevents(); // 事件分类处理函数入口
 private:
     void CallRdfunc();
     void CallWrfunc();
