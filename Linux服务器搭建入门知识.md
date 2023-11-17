@@ -1,4 +1,4 @@
-# Linux服务器搭建入门课
+# Linux服务器 网络编程
 
 ## 1. Linux系统编程入门
 
@@ -13,7 +13,7 @@ gcc和g++都是GCC组织的编译器 ，套件和库；一般用gcc和g++两个�
 
 * 预处理 编译 汇编 链接 
 
-* -c 只是编译不链接,生成目标文件“.o”  test.o
+* -c 只是汇编不链接,生成目标文件“.o”  test.o
 
   -S 只是编译不汇编,生成汇编代码  test.s
 
@@ -25,13 +25,14 @@ gcc和g++都是GCC组织的编译器 ，套件和库；一般用gcc和g++两个�
 
 * -D 指定宏 配合#ifdef DEBUG #endif
   g++ test.cpp -o test -DDEBUG *指定宏DEGUB*
+
 * -I 指定include包含文件搜索目录
+
 * -L 指定编译时 库 的路径
+
 * -l 指定编译时 使用的 库
 
-![image-20230214150013734](D:\MyTxt\typoraPhoto\image-20230214150013734.png)
 
-![image-20230214151216633](D:\MyTxt\typoraPhoto\image-20230214151216633.png)
 
 ### 库
 
@@ -42,26 +43,27 @@ gcc和g++都是GCC组织的编译器 ，套件和库；一般用gcc和g++两个�
 * 好处：1. 代码保密（cpp反汇编还原度低）；2. 方便部署和分发
 
 * **工作原理**：静态库GCC链接时，把静态库代码打包到可执行程序中；
-                    动态度GCC链接时，动态库代码**不会**被打包到可执行程序中，运行时加载到内存中，通过ldd(list dynamic dependencies)命令检查动态库依赖关系；系统加载可执行代码时，需要知道库的名字和绝对路径，一般用**动态载入器获取绝对路径，然后找到库文件载入内存中**
+      动态度GCC链接时，动态库代码**不会**被打包到可执行程序中，运行时加载到内存中，通过ldd(list dynamic dependencies)命令检查动态库依赖关系；系统加载可执行代码时，需要知道库的名字和绝对路径，一般用**动态载入器获取绝对路径，然后找到库文件载入内存中**
 
-   **优缺点比较**：
+  **优缺点比较**：
 
   * 静态库被打包到应用程序 ；加载速度快；
         但消耗资源，浪费内存； 更新速度慢；
-  *  动态库 可以进程资源共享（共享库）；更新部署简单；控制加载时间；
-       但加载速度慢；发布程序需要提供依赖的动态库；
+  * 动态库 可以进程资源共享（共享库）；更新部署简单；控制加载时间；
+    但加载速度慢；发布程序需要提供依赖的动态库；
   * 库比较小用静态 大用动态
 
 #### 静态库
 
 * 命名规则 Linux:    libxxx.a
-  				Win :     libxxx.lib
+  	Win :     libxxx.lib
 
 * 制作静态库
 
   1. gcc获得.o文件 - c
 
   2. 将 .o文件打包，使用ar工具 
+
      ~~~shell
      ar rcs libxxx.a  xxx.o xxx.o
      ~~~
@@ -69,20 +71,21 @@ gcc和g++都是GCC组织的编译器 ，套件和库；一般用gcc和g++两个�
      静态库移动到lib目录下
 
   3. 编译main程序
+
      ~~~shell 
      gcc main.c -o app -I ./include/ -L ./lib/ -l xxx
      ~~~
 
-     ![image-20230214160115050](D:\MyTxt\typoraPhoto\image-20230214160115050.png)
 
 #### 动态库
 
 * 命名规则 Linux:   libxxx.so 在Linux下是一个可执行文件
-  				Win :    libxxx.dll
+  	Win :    libxxx.dll
 
 * 制作动态库
 
   1. gcc得到.o文件，得到与位置无关的代码
+
      ~~~shell	
      gcc -c -fpic/-fPIC a.c b.c
      ~~~
@@ -90,11 +93,13 @@ gcc和g++都是GCC组织的编译器 ，套件和库；一般用gcc和g++两个�
      -fpic 用于编译阶段，产生的代码没有绝对地址，全部用相对地址，这正好满足了共享库的要求，共享库被加载时地址不是固定的。如果不加-fpic ，那么生成的代码就会与位置有关，当进程使用该.so文件时都需要重定位，且会产生成该文件的副本，每个副本都不同，不同点取决于该文件代码段与数据段所映射内存的位置
 
   2. gcc得到动态库
+
      ~~~shell
      gcc -shared a.o b.o -o libcalc.so
      ~~~
 
   3. 编译mian程序
+
      ~~~shell
      gcc main.c -o app2 -I ./include/ -L ./lib/ -l calc
      ~~~
@@ -110,6 +115,7 @@ gcc和g++都是GCC组织的编译器 ，套件和库；一般用gcc和g++两个�
         ~~~
 
      2. 用户级别 在用户中配置.bashrc环境变量
+
         ~~~shell
         vim .bashrc
         
@@ -148,18 +154,6 @@ $(target):$(objs)
  		rm $(objs) -f
 ~~~
 
-![image-20230214231348841](D:\MyTxt\typoraPhoto\image-20230214231348841.png)
-
-![image-20230214231358292](D:\MyTxt\typoraPhoto\image-20230214231358292.png)
-
-![image-20230215135331986](D:\MyTxt\typoraPhoto\image-20230215135331986.png)
-
-![image-20230215135347416](D:\MyTxt\typoraPhoto\image-20230215135347416.png)
-
-![image-20230215135357950](D:\MyTxt\typoraPhoto\image-20230215135357950.png)
-
-![image-20230215135426200](D:\MyTxt\typoraPhoto\image-20230215135426200.png)
-
 ### GDB
 
 ​	调试工具，是许多类Unix系统中的标准开发环境
@@ -173,22 +167,21 @@ $(target):$(objs)
   3. -Wall打开所有warning
 
 * gdb基本操作
+
   ~~~shell
   #应该要保证可执行文件和源文件都在
   gdb 目标程序
   ~~~
 
-  ![image-20230215165845215](D:\MyTxt\typoraPhoto\image-20230215165845215.png)
 
 * 断点操作
 
   **退出gdb后断点全部失效**
 
-  ![image-20230215185707288](D:\MyTxt\typoraPhoto\image-20230215185707288.png)
-
 * 调试命令 
 
-  ![image-20230215190042661](D:\MyTxt\typoraPhoto\image-20230215190042661.png)
+
+  bt打印堆栈
 
 ### Linux系统的IO函数
 
@@ -201,7 +194,7 @@ $(target):$(objs)
 * FILE类型 文件描述符
 
 * 库函数说明查找
-  
+
   ~~~shell
   #Linux库函数
   man 2 xxx
@@ -276,7 +269,6 @@ $(target):$(objs)
 ##### 创建文件
 
 ```c
-
  int open(const char *pathname, int flags, mode_t mode);的说明参数：
     - pathname：要创建的文件的路径
     - flags：对文件的操作权限和其他的设置
@@ -333,6 +325,7 @@ ssize_t read(int fd, void *buf, size_t count);
             =0：文件已经读取完了
         - 失败：-1 ，并且设置errno
 ```
+
 #### write函数
 
 ```c
@@ -346,6 +339,7 @@ ssize_t write(int fd, const void *buf, size_t count);
         成功：实际写入的字节数
         失败：返回-1，并设置errno
 ```
+
 例子：读写复制文件
 
 ~~~c
@@ -481,12 +475,10 @@ int lstat(const char *pathname, struct stat *statbuf);获取软链接的文件�
         失败：返回-1 设置errno
 ```
 
-![image-20230218161815168](D:\MyTxt\typoraPhoto\image-20230218161815168.png)
 
 例子：用stat实现ls -l
 
 ~~~c
-
 #include<stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -648,6 +640,7 @@ if(ret == -1) {
 return 0;
 }
 ```
+
 ##### truncate修改文件尺寸
 
 ```c
@@ -680,6 +673,7 @@ if(ret == -1) {
 return 0;
 }
 ```
+
 #### 目录操作函数
 
 ##### mkdir函数创建目录
@@ -789,7 +783,6 @@ struct dirent *readdir(DIR *dirp);
 //返回值 dirent结构体的具体 元素 如图
 ```
 
-![image-20230219211206835](D:\MyTxt\typoraPhoto\image-20230219211206835.png)
 
 ##### closedir()
 
@@ -1060,7 +1053,9 @@ int main() {
 ### 2.1进程状态转换  -终端指令
 
 * Linux中PBC的结构体task_struct
+
 * 进程参数查看 ulimit -a 
+
 * 查看进程
   ps aux / ajx
   a：显示终端上的所有进程，包括其他用户的进程
@@ -1091,12 +1086,14 @@ int main() {
   ⚫ T 根据进程运行时间长短排序
   ⚫ U 根据用户名来筛选进程
   ⚫ K 输入指定的 PID 杀死进程
+
 * 杀死进程
   kill [-signal] pid
   kill –l 列出所有信号
   kill –SIGKILL 进程ID
   kill -9 进程ID
   killall name 根据进程名杀死进程
+
 * 进程号和进程组相关函数：
   ⚫ pid_t getpid(void);
   ⚫ pid_t getppid(void);  //父进程的pid
@@ -1108,44 +1105,44 @@ int main() {
 
 * 创建子进程
 
-    #include <sys/types.h>
-    #include <unistd.h>
-    
-    pid_t fork(void);
-        函数的作用：用于创建子进程。
-        返回值：
-            fork()的返回值会返回两次。一次是在父进程中，一次是在子进程中。
-            在父进程中返回创建的子进程的ID,
-            在子进程中返回0
-            如何区分父进程和子进程：通过fork的返回值。
-            在父进程中返回-1，表示创建子进程失败，并且设置errno
-    
-        父子进程之间的关系：
-        区别：
-            1.fork()函数的返回值不同
-                父进程中: >0 返回的子进程的ID
-                子进程中: =0
-            2.pcb中的一些数据
-                当前的进程的id pid
-                当前的进程的父进程的id ppid
-                信号集
-        
-        共同点：
-            某些状态下：子进程刚被创建出来，还没有执行任何的写数据的操作
-                - 用户区的数据
-                - 文件描述符表
-        
-        父子进程对变量是不是共享的？
-            - 刚开始的时候，是一样的，共享的。如果修改了数据，不共享了。
-            - 读时共享（子进程被创建，两个进程没有做任何的写的操作），写时拷贝。
-    
-     实际上，更准确来说，Linux 的 fork() 使用是通过**写时拷贝 (copy- on-write)** 实现。
-    写时拷贝是一种可以推迟甚至避免拷贝数据的技术。
-    内核此时并不复制整个进程的地址空间，而是让父子进程共享同一个地址空间。
-    只用在需要写入的时候才会复制地址空间，从而使各个进行拥有各自的地址空间。
-    也就是说，资源的复制是在需要写入的时候才会进行，在此之前，只有以只读方式共享。
-    注意：fork之后父子进程共享文件，
-    fork产生的子进程与父进程相同的文件文件描述符指向相同的文件表，引用计数增加，共享文件偏移指针。
+  #include <sys/types.h>
+  #include <unistd.h>
+
+  pid_t fork(void);
+      函数的作用：用于创建子进程。
+      返回值：
+          fork()的返回值会返回两次。一次是在父进程中，一次是在子进程中。
+          在父进程中返回创建的子进程的ID,
+          在子进程中返回0
+          如何区分父进程和子进程：通过fork的返回值。
+          在父进程中返回-1，表示创建子进程失败，并且设置errno
+
+      父子进程之间的关系：
+      区别：
+          1.fork()函数的返回值不同
+              父进程中: >0 返回的子进程的ID
+              子进程中: =0
+          2.pcb中的一些数据
+              当前的进程的id pid
+              当前的进程的父进程的id ppid
+              信号集
+      
+      共同点：
+          某些状态下：子进程刚被创建出来，还没有执行任何的写数据的操作
+              - 用户区的数据
+              - 文件描述符表
+      
+      父子进程对变量是不是共享的？
+          - 刚开始的时候，是一样的，共享的。如果修改了数据，不共享了。
+          - 读时共享（子进程被创建，两个进程没有做任何的写的操作），写时拷贝。
+
+   实际上，更准确来说，Linux 的 fork() 使用是通过**写时拷贝 (copy- on-write)** 实现。
+  写时拷贝是一种可以推迟甚至避免拷贝数据的技术。
+  内核此时并不复制整个进程的地址空间，而是让父子进程共享同一个地址空间。
+  只用在需要写入的时候才会复制地址空间，从而使各个进行拥有各自的地址空间。
+  也就是说，资源的复制是在需要写入的时候才会进行，在此之前，只有以只读方式共享。
+  注意：fork之后父子进程共享文件，
+  fork产生的子进程与父进程相同的文件文件描述符指向相同的文件表，引用计数增加，共享文件偏移指针。
 
 * 查看例子
 
@@ -1233,40 +1230,41 @@ e(environment) 存有环境变量字符串地址的指针数组的地址
 
     
 
-         #include <unistd.h>
-        int execl(const char *path, const char *arg, ...);
-            - 参数：
-                - path:需要指定的执行的文件的路径或者名称
-                    a.out /home/nowcoder/a.out 推荐使用绝对路径
-                    ./a.out hello world   
-                - arg:是执行可执行文件所需要的参数列表
-                第一个参数一般没有什么作用，为了方便，一般写的是执行的程序的名称
-                从第二个参数开始往后，就是程序执行所需要的的参数列表。
-                参数最后需要以NULL结束（哨兵）
-     
-        - 返回值：
-            只有当调用失败，才会有返回值，返回-1，并且设置errno
-            如果调用成功，没有返回值。
+      #include <unistd.h>
+
+     int execl(const char *path, const char *arg, ...);
+         - 参数：
+             - path:需要指定的执行的文件的路径或者名称
+                 a.out /home/nowcoder/a.out 推荐使用绝对路径
+                 ./a.out hello world   
+             - arg:是执行可执行文件所需要的参数列表
+             第一个参数一般没有什么作用，为了方便，一般写的是执行的程序的名称
+             从第二个参数开始往后，就是程序执行所需要的的参数列表。
+             参数最后需要以NULL结束（哨兵）
+
+     - 返回值：
+       只有当调用失败，才会有返回值，返回-1，并且设置errno
+       如果调用成功，没有返回值。
 
 * execlp
 
-    ```c
-    #include <unistd.h>
-    int execlp(const char *file, const char *arg, ... );
-        - 会到环境变量中查找指定的可执行文件，如果找到了就执行，找不到就执行不成功。
-        - 参数：
-            - file:需要执行的可执行文件的文件名
-                a.out
-                ps
-    - arg:是执行可执行文件所需要的参数列表
-            第一个参数一般没有什么作用，为了方便，一般写的是执行的程序的名称
-            从第二个参数开始往后，就是程序执行所需要的的参数列表。
-            参数最后需要以NULL结束（哨兵）
-    
-    - 返回值：
-        只有当调用失败，才会有返回值，返回-1，并且设置errno
-        如果调用成功，没有返回值。
-    ```
+  ```c
+  #include <unistd.h>
+  int execlp(const char *file, const char *arg, ... );
+      - 会到环境变量中查找指定的可执行文件，如果找到了就执行，找不到就执行不成功。
+      - 参数：
+          - file:需要执行的可执行文件的文件名
+              a.out
+              ps
+  - arg:是执行可执行文件所需要的参数列表
+          第一个参数一般没有什么作用，为了方便，一般写的是执行的程序的名称
+          从第二个参数开始往后，就是程序执行所需要的的参数列表。
+          参数最后需要以NULL结束（哨兵）
+  
+  - 返回值：
+      只有当调用失败，才会有返回值，返回-1，并且设置errno
+      如果调用成功，没有返回值。
+  ```
 
 * execv
 
@@ -1309,7 +1307,6 @@ int main() {
 }
 ~~~
 
-![image-20230222142604615](D:\MyTxt\typoraPhoto\image-20230222142604615.png)
 
 ##### 孤儿进程 
 
@@ -1325,7 +1322,6 @@ int main() {
 ◼ 进程终止时，父进程尚未回收，子进程残留资源（PCB）存放于内核中，变成僵尸（Zombie）进程。
 ◼ 僵尸进程不能被 kill -9 杀死，这样就会导致一个问题，如果父进程不调用 wait()或 waitpid() 的话，那么保留的那段信息就不会释放，其进程号就会一直被占用，但是系统所能使用的进程号是有限的，如果大量的产生僵尸进程，将因为没有可用的进程号而导致系统不能产生新的进程，此即为僵尸进程的危害，应当避免。
 
-![image-20230222143746621](D:\MyTxt\typoraPhoto\image-20230222143746621.png)
 
 ##### 进程回收
 
@@ -1509,12 +1505,10 @@ int main() {
 * windowOS 的一台主机：命名管道和共享内存
 * 类Unix的一台主机：套接字
 
-<img src="D:\MyTxt\typoraPhoto\image-20230222170747041.png" alt="image-20230222170747041" style="zoom:50%;" />
 
 * （匿名）管道，Unix系统最古老的通信方式，所有Unix系统都支持
 * 统计目录中文件数量的命令： ls | wc -l
-   实际上就是创建管道 把写入端导出读取端
-* <img src="D:\MyTxt\typoraPhoto\image-20230222172058889.png" alt="image-20230222172058889" style="zoom:50%;" />
+  实际上就是创建管道 把写入端导出读取端
 
 ##### 管道特点
 
@@ -1526,15 +1520,12 @@ int main() {
 6. 从管道中读取数据是一次性操作，数据一旦被读走了，就从管道抛弃了，(队列实现)释放空间以便写入更多的数据，在管道中无法使用lseek()随机访问数据
 7. 管道只能在具有公共祖先的进程（父子进程，兄弟进程，具有亲缘关系）之间使用
 
-<img src="D:\MyTxt\typoraPhoto\image-20230222173206683.png" alt="image-20230222173206683" style="zoom: 50%;" />
 
 * 管道原理：子进程forkc()出来之后，可以共享文件描述符，可以操作建立管道
 
-<img src="D:\MyTxt\typoraPhoto\image-20230222173922960.png" alt="image-20230222173922960" style="zoom:33%;" />
 
 * 管道数据结构：环形队列
 
-<img src="D:\MyTxt\typoraPhoto\image-20230222174026442.png" alt="image-20230222174026442" style="zoom: 50%;" />
 
 ##### 匿名管道传输pipe()函数
 
@@ -1666,10 +1657,10 @@ int main(){
 
 * 获取管道大小
 
-*     // 1. 函数获取管道的大小
-      long size = fpathconf(pipefd[0], _PC_PIPE_BUF);
-      // 2. 终端获取管道信息
-      ulimit -a
+* // 1. 函数获取管道的大小
+  long size = fpathconf(pipefd[0], _PC_PIPE_BUF);
+  // 2. 终端获取管道信息
+  ulimit -a
 
 ##### ps aux | grep xxx 操作实现 -父子进程通信案例
 
@@ -1774,31 +1765,33 @@ int main(){
 
 ##### 与匿名管道区别：
 
-有名管道（FIFO)和匿名管道（pipe）有一些特点是相同的，不一样的地方在于： 1. FIFO 在文件系统中作为一个特殊文件存在，但 FIFO 中的内容却存放在内存中。 2. 当使用 FIFO 的进程退出后，FIFO 文件将继续保存在文件系统中以便以后使用。 3. FIFO 有名字，不相关的进程可以通过打开有名管道进行通信。
+有名管道（FIFO)和匿名管道（pipe）有一些特点是相同的，不一样的地方在于： 
 
-1. 通过命令创建有名管道 mkfifo 名字
+1. FIFO 在文件系统中作为一个特殊文件存在，但 FIFO 中的内容却存放在内存中。 2. 当使用 FIFO 的进程退出后，FIFO 文件将继续保存在文件系统中以便以后使用。 3. FIFO 有名字，不相关的进程可以通过打开有名管道进行通信。
 
-2. 通过函数创建有名管道 
-    int mkfifo(const char *pathname, mode_t mode); 
+2. 通过命令创建有名管道 mkfifo 名字
 
-    ~~~c
-    创建fifo文件
-        1.通过命令： mkfifo 名字
-        2.通过函数：int mkfifo(const char *pathname, mode_t mode);
-    
-        #include <sys/types.h>
-        #include <sys/stat.h>
-        int mkfifo(const char *pathname, mode_t mode);
-            参数：
-                - pathname: 管道名称的路径
-                - mode: 文件的权限 和 open 的 mode 是一样的
-                        是一个八进制的数
-            返回值：成功返回0，失败返回-1，并设置错误号
-    ~~~
+3. 通过函数创建有名管道 
+   int mkfifo(const char *pathname, mode_t mode); 
 
-3. 一旦使用 mkfifo 创建了一个 FIFO，就可以使用 **open** 打开它，常见的文件 I/O 函数都可用于 fifo。如：close、read、write、unlink 等。 
+   ~~~c
+   创建fifo文件
+       1.通过命令： mkfifo 名字
+       2.通过函数：int mkfifo(const char *pathname, mode_t mode);
+   
+       #include <sys/types.h>
+       #include <sys/stat.h>
+       int mkfifo(const char *pathname, mode_t mode);
+           参数：
+               - pathname: 管道名称的路径
+               - mode: 文件的权限 和 open 的 mode 是一样的
+                       是一个八进制的数
+           返回值：成功返回0，失败返回-1，并设置错误号
+   ~~~
 
-4. FIFO 严格遵循先进先出（First in First out），对管道及 FIFO 的读总是 从开始处返回数据，对它们的写则把数据添加到末尾。它们不支持诸如 lseek() 等文件定位操作。
+4. 一旦使用 mkfifo 创建了一个 FIFO，就可以使用 **open** 打开它，常见的文件 I/O 函数都可用于 fifo。如：close、read、write、unlink 等。 
+
+5. FIFO 严格遵循先进先出（First in First out），对管道及 FIFO 的读总是 从开始处返回数据，对它们的写则把数据添加到末尾。它们不支持诸如 lseek() 等文件定位操作。
 
 ##### 有名管道注意事项
 
@@ -1820,7 +1813,6 @@ int main(){
             管道没有满，write将数据写入，并返回实际写入的字节数。
 ~~~
 
-![image-20230223161443567](D:\MyTxt\typoraPhoto\image-20230223161443567.png)
 
 ##### 同一路径下 有名管道创建并用于读写的例子
 
@@ -1913,7 +1905,6 @@ int main(){
 
 Memory-mapped I/O 是将磁盘文件的数据映射到内存，用户通过修改内存就可以修改磁盘文件
 
-<img src="D:\MyTxt\typoraPhoto\image-20230224145114660.png" alt="image-20230224145114660" style="zoom:50%;" />
 
 ~~~c
     #include <sys/mman.h>
@@ -2142,12 +2133,12 @@ int main(){
 #### 使用内存映射实现文件的拷贝
 
 * 使用内存映射实现文件拷贝的功能
-    思路：
-        1.对原始的文件进行内存映射
-        2.创建一个新文件（拓展该文件）
-        3.把新文件的数据映射到内存中
-        4.通过内存拷贝将第一个文件的内存数据拷贝到新的文件内存中
-        5.释放资源
+  思路：
+      1.对原始的文件进行内存映射
+      2.创建一个新文件（拓展该文件）
+      3.把新文件的数据映射到内存中
+      4.通过内存拷贝将第一个文件的内存数据拷贝到新的文件内存中
+      5.释放资源
 
 ```c
 #include <stdio.h>
@@ -2266,10 +2257,10 @@ int main() {
 
 ##### 概述
 
-* 概述 : 信号是 Linux 进程间通信的最古老的方式之一，是事件发生时对进程的通知机制，有时也
-  称之为软件中断，它是在软件层次上对中断机制的一种模拟，是一种异步通信的方式。信号
-  可以导致一个正在运行的进程被另一个正在运行的异步进程中断，转而处理某一个突发事件。
+* 概述 : 信号是 Linux 进程间通信的最古老的方式之一，是事件发生时对进程的通知机制，有时也称之为软件中断，它是在软件层次上对中断机制的一种模拟，是一种异步通信的方式。信号可以导致一个正在运行的进程被另一个正在运行的异步进程中断，转而处理某一个突发事件。
+
 * 发往进程的诸多信号，通常都是源于内核。引发内核为进程产生信号的各类事件如下：
+
   1. 对于前台进程，用户可以通过输入特殊的终端字符来给它发送信号。比如输入Ctrl+C
      通常会给进程发送一个中断信号。
   2. 硬件发生异常，即硬件检测到一个错误条件并通知内核，随即再由内核发送相应信号给
@@ -2277,7 +2268,7 @@ int main() {
      内存区域。
   3. 系统状态变化，比如 alarm 定时器到期将引起 SIGALRM 信号，进程执行的 CPU
      时间超限，或者该进程的某个子进程退出。
-  4.  运行 kill 命令或调用 kill 函数。
+  4. 运行 kill 命令或调用 kill 函数。
 
 * 使用信号的两个主要目的是：
 
@@ -2288,8 +2279,8 @@ int main() {
 
   1. 简单
   2. 不能携带大量信息
-  3.  满足某个特定条件才发送
-  4.  优先级比较高
+  3. 满足某个特定条件才发送
+  4. 优先级比较高
 
 * ~~~shell
   1. 查看系统定义的信号列表：kill –l
@@ -2307,13 +2298,6 @@ int main() {
   4. SIGKILL 和 SIGSTOP 信号不能被捕捉、阻塞或者忽略，只能执行默认动作。
   ~~~
 
-  <img src="D:\MyTxt\typoraPhoto\image-20230225153502429.png" alt="image-20230225153502429" style="zoom:50%;" />
-
-  <img src="D:\MyTxt\typoraPhoto\image-20230225153518112.png" alt="image-20230225153518112" style="zoom:50%;" />
-
-  <img src="D:\MyTxt\typoraPhoto\image-20230225153533345.png" alt="image-20230225153533345" style="zoom:50%;" />
-
-  <img src="D:\MyTxt\typoraPhoto\image-20230225153713035.png" alt="image-20230225153713035" style="zoom:50%;" />
 
   * 这里注意kill 9不能杀死僵尸进程
   * 可以用kill -l查看信号对应的编号
@@ -2547,7 +2531,6 @@ int main(){
 * 信号的**阻塞就是让系统暂时保留信号留待以后发送**。由于另外有办法让系统忽略信号，所以一般情况下信号的阻塞只是暂时的，只是为了防止信号打断敏感的操作。
 * 下图，进程的虚拟地址空间，包括用户区和内核区，内核区中有PCB进程控制块，PCB中有未决信号集和阻塞信号集 
 
-<img src="D:\MyTxt\typoraPhoto\image-20230226152103733.png" alt="image-20230226152103733" style="zoom:50%;" />
 
 ~~~shell
 1.用户通过键盘  Ctrl + C, 产生2号信号SIGINT (信号被创建)
@@ -2787,12 +2770,10 @@ int main(){
 
 ```
 
-<img src="D:\MyTxt\typoraPhoto\image-20230226165653806.png" alt="image-20230226165653806" style="zoom: 80%;" />
 
 * 例子
 
 ```c
-
 #include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -2841,7 +2822,7 @@ int main() {
 
 ##### SIGCHLD信号 - 回收子进程
 
-*  SIGCHLD信号产生的条件
+* SIGCHLD信号产生的条件
 
   1. 子进程终止时
   2. 子进程接收到 SIGSTOP 信号停止时
@@ -2929,8 +2910,8 @@ int main(){
 
 ### 2.8共享内存
 
-1. 共享内存允许两个或者多个进程共享物理内存的同一块区域（通常被称为段）。由于一个共享内存段会成为一个进程用户空间的一部分，因此这种 IPC 机制**无需内核介入**（较少介入）。所有需要做的就是让一个进程将数据复制进共享内存中，并且这部分数据会对其他所有共享同一个段的进程可用。
-2. 与管道等要求发送进程将数据从用户空间的缓冲区复制进内核内存和接收进程将数据从内核内存复制进用户空间的缓冲区的做法相比，这种 IPC 技术的速度更快。
+1. 共享内存允许**两个或者多个进程共享物理内存的同一块区域**（通常被称为段）。由于一个共享内存段会成为一个进程用户空间的一部分，因此这种 IPC 机制**无需内核介入**（较少介入）。所有需要做的就是让一个进程将数据复制进共享内存中，并且这部分数据会对其他所有共享同一个段的进程可用。
+2. 与管道等要求发送进程将数据从用户空间的缓冲区复制进内核内存和接收进程将数据从内核内存复制进用户空间的缓冲区的做法相比，这种 IPC 技术的**速度更快**。
 
 ##### 共享内存使用步骤
 
@@ -3073,7 +3054,7 @@ int main(){
     ipcs -m // 打印出**使用共享内存**进行进程间通信的信息
     ipcs -q // 打印出**使用消息队列**进行进程间通信的信息
     ipcs -s // 打印出**使用信号进行进程间通信**的信息
-2.  ipcrm 用法
+2. ipcrm 用法
     ipcrm -M shmkey    // 移除用shmkey创建的共享内存段
     ipcrm -m shmid // 移除用shmid标识的共享内存段
     ipcrm -Q msgkey // 移除用msqkey创建的消息队列
@@ -3150,7 +3131,6 @@ int main(){
 
 ◼ 当控制终端的连接建立起来之后，会话首进程会成为该终端的控制进程。
 
-![image-20230227112850159](D:\MyTxt\typoraPhoto\image-20230227112850159.png)
 
 * 进程组、会话操作函数
 
@@ -3294,14 +3274,14 @@ int main(){
    error 变量
    实时调度策略和优先级
    栈，本地变量和函数的调用链接信息
-*  查看当前 pthread 库版本：`getconf GNU_LIBPTHREAD_VERSION`
+* 查看当前 pthread 库版本：`getconf GNU_LIBPTHREAD_VERSION`
 
 ##### 线程与进程的区别
 
 1.  进程间的信息难以共享。由于除去只读代码段外，父子进程并未共享内存，因此必须采用一些进程间通信方式，在进程间进行信息交换。
-2. 调用 fork() 来创建进程的代价相对较高，即便利用写时复制技术，仍然需要复制诸如内存页表和文件描述符表之类的多种进程属性，这意味着 fork() 调用在时间上的开销依然不菲。
-3. 线程之间能够方便、快速地共享信息。只需将数据复制到共享（全局或堆）变量中即可。
-4. 创建线程比创建进程通常要快 10 倍甚至更多。线程间是共享虚拟地址空间的，无需采用写时复制来复制内存，也无需复制页表。
+2.  调用 fork() 来创建进程的代价相对较高，即便利用写时复制技术，仍然需要复制诸如内存页表和文件描述符表之类的多种进程属性，这意味着 fork() 调用在时间上的开销依然不菲。
+3.  线程之间能够方便、快速地共享信息。只需将数据复制到共享（全局或堆）变量中即可。
+4.  创建线程比创建进程通常要快 10 倍甚至更多。线程间是共享虚拟地址空间的，无需采用写时复制来复制内存，也无需复制页表。
 
 ### 3.2线程操作
 
@@ -3661,8 +3641,8 @@ int main(){
 
 * 线程同步
   1. 线程的主要优势在于，能够通过**全局变量来共享信息**。不过，这种便捷的共享是有代价的：必须确保多个线程不会同时修改同一变量，或者某一线程不会读取正在由其他线程修改的变量。
-  2.  **临界区**是指访问某一**共享资源的代码片段**，并且这段代码的执行应为**原子操作**，也就是同时访问同一共享资源的其他线程不应终端该片段的执行。
-  3.  **线程同步**：即当有一个线程在对内存进行操作时，其他线程都不可以对这个内存地址进行操作，直到该线程完成操作，其他线程才能对该内存地址进行操作，而其他线程则处于等待状态。
+  2. **临界区**是指访问某一**共享资源的代码片段**，并且这段代码的执行应为**原子操作**，也就是同时访问同一共享资源的其他线程不应终端该片段的执行。
+  3. **线程同步**：即当有一个线程在对内存进行操作时，其他线程都不可以对这个内存地址进行操作，直到该线程完成操作，其他线程才能对该内存地址进行操作，而其他线程则处于等待状态。
 
 * 互斥量
 
@@ -3680,7 +3660,6 @@ int main(){
 
 如果多个线程试图执行这一块代码（一个临界区），事实上只有一个线程能够持有该互斥量（其他线程将遭到阻塞），即同时只有一个线程能够进入这段代码区域。
 
-<img src="D:\MyTxt\typoraPhoto\image-20230228103959862.png" alt="image-20230228103959862" style="zoom: 50%;" />
 
 ```c
     互斥量的类型 pthread_mutex_t
@@ -3772,7 +3751,6 @@ int main(){
   2. 重复加锁
   3. 多线程多锁，抢占锁资源
 
-<img src="D:\MyTxt\typoraPhoto\image-20230228111719038.png" alt="image-20230228111719038" style="zoom: 50%;" />
 
 * 演示死锁 
 
@@ -4120,7 +4098,6 @@ int main()
 * 例子：资源不足的时候，条件变量wait等待生产者，生产者生产后，条件变量signal通知生产者
 
 ```c
-
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
@@ -4376,7 +4353,6 @@ socket是一套通信的接口，Linux 和 Windows 都有，但是有一些细�
   址处；小端字节序则是指整数的高位字节存储在内存的高地址处，而低位字节则存储在内存的低地
   址处。
 
-![image-20230301104201183](D:\MyTxt\typoraPhoto\image-20230301104201183.png)
 
 ```c
 //用union查找字节序
@@ -4473,13 +4449,11 @@ typedef unsigned short int sa_family_t;
 1. sa_family 成员是地址族类型（sa_family_t）的变量。地址族类型通常与协议族类型对应。常见的协议
    族（protocol family，也称 domain）和对应的地址族入下所示
 
-<img src="D:\MyTxt\typoraPhoto\image-20230301142702830.png" alt="image-20230301142702830" style="zoom:50%;" />
 
 * 宏 PF\_\* 和 AF\_\* 都定义在 bits/socket.h 头文件中，且后者与前者有完全相同的值，所以二者通常混用。
 
 2. sa_data 成员用于存放 socket 地址值。但是，不同的协议族的地址值具有不同的含义和长度，如下所示：
 
-<img src="D:\MyTxt\typoraPhoto\image-20230301142805645.png" alt="image-20230301142805645" style="zoom:50%;" />
 
 由上表可知，14 字节的 sa_data 根本无法容纳多数协议族的地址值。因此，Linux 定义了下面这个新的通用的 socket 地址结构体，这个结构体不仅提供了足够大的空间用于存放地址值，而且是内存对齐的。
 
@@ -4498,7 +4472,6 @@ typedef unsigned short int sa_family_t;
 
 很多网络编程函数诞生早于 IPv4 协议，那时候都使用的是 struct sockaddr 结构体，为了向前兼容，现在sockaddr **退化成了（void *）**的作用，传递一个地址给函数，至于这个函数是 sockaddr_in 还是sockaddr_in6，由地址族确定，然后函数内部再**强制类型转化为所需的地址类型**。
 
-<img src="D:\MyTxt\typoraPhoto\image-20230301143653912.png" alt="image-20230301143653912" style="zoom:50%;" />
 
 UNIX 本地域协议族使用如下专用的 socket 地址结构体：
 
@@ -4629,7 +4602,6 @@ TCP:传输控制协议，面向连接的，可靠的，基于字节流，仅支�
 适用场景 实时应用（视频会议，直播）  ||可靠性高的应用（文件传输）
 ```
 
-<img src="D:\MyTxt\typoraPhoto\image-20230301155418481.png" alt="image-20230301155418481" style="zoom: 67%;" />
 
 ##### TCP通信流程
 
@@ -4670,9 +4642,9 @@ int socket(int domain, int type, int protocol);
 - 功能：创建一个套接字	
   - 参数：
     - domain: 协议族
-   AF_INET : ipv4
-   AF_INET6 : ipv6
-   AF_UNIX, AF_LOCAL : 本地套接字通信（进程间通信）
+       AF_INET : ipv4
+       AF_INET6 : ipv6
+       AF_UNIX, AF_LOCAL : 本地套接字通信（进程间通信）
     - type: 通信过程中使用的协议类型
       SOCK_STREAM : 流式协议//TC一般 用这个
       SOCK_DGRAM : 报式协议//UDP等
@@ -5038,7 +5010,6 @@ TCP 提供了一种可靠、面向连接、字节流、传输层的服务，采�
 
 ###### TCP报文头
 
-<img src="D:\MyTxt\typoraPhoto\image-20230302114709452.png" alt="image-20230302114709452" style="zoom:50%;" />
 
 * 16 位端口号（port number）：告知主机报文段是来自哪里（源端口）以及传给哪个上层协议或
   应用程序（目的端口）的。进行 TCP 通信时，客户端通常使用系统自动选择的临时端口号
@@ -5074,7 +5045,7 @@ TCP 提供了一种可靠、面向连接、字节流、传输层的服务，采�
 
 ###### 三次握手连接过程
 
-<img src="D:\MyTxt\typoraPhoto\image-20230302135058522.png" alt="image-20230302135058522" style="zoom:50%;" />
+
 
 ```c
 第一次握手：
@@ -5113,7 +5084,6 @@ TCP 中采用滑动窗口来进行传输控制，**滑动窗口的大小意味�
 发送缓冲区（发送缓冲区的窗口）
 接收缓冲区（接收缓冲区的窗口）
 
-![image-20230302142113013](D:\MyTxt\typoraPhoto\image-20230302142113013.png)
 
 ```c
 发送方的缓冲区：
@@ -5125,7 +5095,7 @@ TCP 中采用滑动窗口来进行传输控制，**滑动窗口的大小意味�
   紫色格子：已经接收到的数据
 ```
 
-![image-20230302142141901](D:\MyTxt\typoraPhoto\image-20230302142141901.png)
+
 
 ```c
 # mss: Maximum Segment Size(一条数据的最大的数据量)
@@ -5155,7 +5125,6 @@ c:滑动窗口2k
 客户端和服务器端都可以主动发起断开连接，谁先调用close()谁就是发起。
 因为在TCP连接的时候，采用三次握手建立的的连接是双向的，在断开的时候需要双向断开。
 
-<img src="D:\MyTxt\typoraPhoto\image-20230302143729767.png" alt="image-20230302143729767" style="zoom:50%;" />
 
 ##### 多进程实现并发服务器
 
@@ -5523,9 +5492,6 @@ int main(){
 
 ##### TCP状态转换
 
-<img src="D:\MyTxt\typoraPhoto\image-20230302175535303.png" alt="image-20230302175535303" style="zoom: 80%;" />
-
-<img src="D:\MyTxt\typoraPhoto\image-20230302175650175.png" alt="image-20230302175650175" style="zoom:67%;" />
 
 * 上图红线是发送方，虚线是接收方
 
@@ -5573,9 +5539,9 @@ SHUT_WR。
 注意:
 
 1. 如果有多个进程共享一个套接字，close 每被调用一次，计数减 1 ，直到计数为 0 时，也就是所用
-    进程都调用了 close，套接字将被释放。
+   进程都调用了 close，套接字将被释放。
 2. 在多进程中如果一个进程调用了 shutdown(sfd, SHUT_RDWR) 后，其它的进程将无法进行通信。
-    但如果一个进程 close(sfd) 将不会影响到其它进程。
+   但如果一个进程 close(sfd) 将不会影响到其它进程。
 
 ##### 端口复用
 
@@ -5584,6 +5550,7 @@ SHUT_WR。
   比如，如果重启服务器的话，就会显示地址已经使用，导致不能重启
 
 * 端口复用最常用的用途是:
+
   1. 防止服务器重启时之前绑定的端口还未释放
   2. 程序突然退出而系统**没有释放端口**
 
@@ -5774,13 +5741,13 @@ int main() {
 又叫IO多路转接，IO指的是针对内存
 
 * BIO模型（线进程和客户端一一对应 accept、read会阻塞）的缺点：
-   1. 线程或者进程会消耗资源；
 
-   2. 线程或者进程的调度消耗CPU资源；
+  1. 线程或者进程会消耗资源；
 
-   3. 根本问题：BOLCKING阻塞
+  2. 线程或者进程的调度消耗CPU资源；
 
-      <img src="D:\MyTxt\typoraPhoto\image-20230303164114741.png" alt="image-20230303164114741" style="zoom: 67%;" />
+  3. 根本问题：BOLCKING阻塞
+
 
 * 非阻塞，忙轮询的模型：
 
@@ -5788,12 +5755,11 @@ int main() {
 
   2. 但是轮询需要占用更多的CPU和系统资源
 
-     <img src="D:\MyTxt\typoraPhoto\image-20230303164324869.png" alt="image-20230303164324869" style="zoom: 33%;" />
 
 * NIO模型：
+
   1. 需要不停调用，read就要调用n次
 
-<img src="D:\MyTxt\typoraPhoto\image-20230303164452309.png" alt="image-20230303164452309" style="zoom:50%;" />
 
 * IO多路转接技术：
   	委托内核，比较快，而且直接可以知道哪些有数据，不需要全部read一遍（select需要）
@@ -5803,11 +5769,12 @@ int main() {
 ##### select
 
 >主旨思想：
+>
 >1. 首先要构造一个关于文件描述符的列表，将要监听的文件描述符添加到该列表中。
 >2. 调用一个系统函数，监听该列表中的文件描述符，直到这些描述符中的一个或者多个进行I/O
->操作时，该函数才返回。
->a.这个函数是阻塞
->b.函数对文件描述符的检测的操作是由内核完成的
+>   操作时，该函数才返回。
+>   a.这个函数是阻塞
+>   b.函数对文件描述符的检测的操作是由内核完成的
 >3. 在返回时，它会告诉进程有多少（哪些）描述符要进行I/O操作。
 
 ```c
@@ -5850,12 +5817,11 @@ void FD_SET(int fd, fd_set *set);
 void FD_ZERO(fd_set *set);
 ```
 
-![image-20230303114212143](D:\MyTxt\typoraPhoto\image-20230303114212143.png)
 
 *  对应 3 4 100 101的fd：
-  1. 先定义reads 1024bit（0-1023），然后监听 3 4 100 101的fd放到reads中
-  2. 用select把reads读到内核中，并且检测，检测到有数据的置位1，没数据置位0，（比如只有3 4 有数据）
-  3. 然后从内核态拷贝到用户态（用户态遍历之后知道3 4 有数据），然后对有数据的进行通信
+   1. 先定义reads 1024bit（0-1023），然后监听 3 4 100 101的fd放到reads中
+   2. 用select把reads读到内核中，并且检测，检测到有数据的置位1，没数据置位0，（比如只有3 4 有数据）
+   3. 然后从内核态拷贝到用户态（用户态遍历之后知道3 4 有数据），然后对有数据的进行通信
 
 ###### select实现多路转接
 
@@ -6005,7 +5971,6 @@ int main() {
   4.**fds集合不能重用**，每次都需要重置
 * poll解决了缺点3 4
 
-<img src="D:\MyTxt\typoraPhoto\image-20230303165739608.png" alt="image-20230303165739608" style="zoom:50%;" />
 
 * poll接口说明
 
@@ -6035,7 +6000,6 @@ int poll(struct pollfd *fds, nfds_t nfds, int timeout);
     >0（n） : 成功,n表示检测到集合中有n个文件描述符发生变化
 ```
 
-<img src="D:\MyTxt\typoraPhoto\image-20230303170358379.png" alt="image-20230303170358379" style="zoom: 67%;" />
 
 ###### poll实现多路转接
 
@@ -6684,7 +6648,6 @@ int main() {
 
 ### 4.7  UDP通信
 
-<img src="D:\MyTxt\typoraPhoto\image-20230306102024691.png" alt="image-20230306102024691" style="zoom: 80%;" />
 
 ```c
  #include <sys/types.h>
@@ -6819,7 +6782,6 @@ int main(){
 a.只能在局域网中使用。
 b.客户端需要绑定服务器广播使用的端口，才可以接收到广播消息
 
-<img src="D:\MyTxt\typoraPhoto\image-20230306114206431.png" alt="image-20230306114206431" style="zoom: 50%;" />
 
 ```c
 // 设置广播属性的函数
@@ -6929,13 +6891,11 @@ int main(){
 a.组播既可以用于局域网，也可以用于广域网
 b.客户端需要加入多播组，才能接收到多播的数据
 
-<img src="D:\MyTxt\typoraPhoto\image-20230306140538652.png" alt="image-20230306140538652" style="zoom: 50%;" />
 
 * 组播地址：
   IP 多播通信必须依赖于 IP 多播地址，在 IPv4 中它的范围从  224.0.0.0 到 239.255.255.255 ，
   并被划分为局部链接多播地址、预留多播地址和管理权限多播地址三类:
 
-<img src="D:\MyTxt\typoraPhoto\image-20230306140713969.png" alt="image-20230306140713969" style="zoom:50%;" />
 
 ```c
 int setsockopt(int sockfd, int level, int optname,const void *optval, 
@@ -7065,11 +7025,10 @@ int main() {
 ### 4.8 本地套接字
 
 * 本地套接字的作用：本地的进程间通信
-   有关系的进程间的通信
-   没有关系的进程间的通信
+  有关系的进程间的通信
+  没有关系的进程间的通信
   本地套接字实现流程和网络套接字类似，一般呢采用TCP的通信流程。
 
-<img src="D:\MyTxt\typoraPhoto\image-20230306153412355.png" alt="image-20230306153412355" style="zoom:50%;" />
 
 ```c
  // 本地套接字通信的流程 - tcp
@@ -7266,7 +7225,6 @@ int main() {
 
 ### 5.1 阻塞非阻塞、同步异步
 
-![image-20230306165424115](D:\MyTxt\typoraPhoto\image-20230306165424115.png)
 
 * 典型的一次IO的两个阶段是什么？数据就绪 和 数据读写
 
@@ -7279,14 +7237,13 @@ int main() {
 
 * 陈硕：在处理 IO 的时候，阻塞和非阻塞都是同步 IO，只有使用了特殊的 API 才是异步 IO
 
-<img src="D:\MyTxt\typoraPhoto\image-20230306165722791.png" alt="image-20230306165722791" style="zoom:67%;" />
 
 >  一个典型的网络IO接口调用，分为两个阶段，分别是“数据就绪” 和 “数据读写”，数据就绪阶段分为
-> 阻塞和非阻塞，表现得结果就是，阻塞当前线程或是直接返回。
-> 同步表示A向B请求调用一个网络IO接口时（或者调用某个业务逻辑API接口时），数据的读写都是
-> 由请求方A**自己来完成**的（不管是阻塞还是非阻塞）；异步表示A向B请求调用一个网络IO接口时
-> （或者调用某个业务逻辑API接口时），向B传入请求的事件以及事件发生时通知的方式，A就可以
-> 处理其它逻辑了，当**B监听到事件处理**完成后，会用事先约定好的通知方式，通知A处理结果。
+>  阻塞和非阻塞，表现得结果就是，阻塞当前线程或是直接返回。
+>  同步表示A向B请求调用一个网络IO接口时（或者调用某个业务逻辑API接口时），数据的读写都是
+>  由请求方A**自己来完成**的（不管是阻塞还是非阻塞）；异步表示A向B请求调用一个网络IO接口时
+>  （或者调用某个业务逻辑API接口时），向B传入请求的事件以及事件发生时通知的方式，A就可以
+>  处理其它逻辑了，当**B监听到事件处理**完成后，会用事先约定好的通知方式，通知A处理结果。
 
  同步阻塞 	同步非阻塞	异步阻塞	异步非阻塞
 
@@ -7299,7 +7256,6 @@ int main() {
 
 1. 有等待 阻塞 2. 有数据拷贝 同步
 
-<img src="D:\MyTxt\typoraPhoto\image-20230306170646903.png" alt="image-20230306170646903" style="zoom: 67%;" />
 
 ##### b.非阻塞 non-blocking（NIO）
 
@@ -7307,7 +7263,6 @@ int main() {
 用总是**立即返回**，不管事件是否已经发生，若事件没有发生，则返回-1，此时可以根据 errno 区分这两
 种情况，对于accept，recv 和 send，事件未发生时，errno 通常被设置成 **EAGAIN**。
 
-<img src="D:\MyTxt\typoraPhoto\image-20230306171245018.png" alt="image-20230306171245018" style="zoom: 67%;" />
 
 ##### c.IO复用（IO multiplexing）
 
@@ -7315,14 +7270,12 @@ Linux 用 select/poll/epoll 函数实现 IO 复用模型，这些函数也会使
 这些函数可以**同时(非)阻塞地处理多个IO操作**。而且可以同时对多个读操作、写操作的IO函数进行**检测**。直到有数
 据可读或可写时，才真正调用IO操作函数。//主要不是处理高并发，而是同时处理多个IO的优点
 
-<img src="D:\MyTxt\typoraPhoto\image-20230306171636481.png" alt="image-20230306171636481" style="zoom: 67%;" />
 
 ##### d.信号驱动（signal-driven）
 
 Linux 用套接口进行信号驱动 IO，安装一个信号处理函数，进程继续运行并不阻塞，当IO事件就绪，进
 程收到SIGIO 信号，然后处理 IO 事件 
 
-<img src="D:\MyTxt\typoraPhoto\image-20230306172310990.png" alt="image-20230306172310990" style="zoom:67%;" />
 
 内核在第一个阶段是异步，在第二个阶段是同步；与非阻塞IO的区别在于它提供了消息通知机制，不需
 要用户进程不断的轮询检查，减少了系统API的调用次数，提高了效率 
@@ -7334,7 +7287,6 @@ Linux 用套接口进行信号驱动 IO，安装一个信号处理函数，进�
 Linux中，可以调用 aio_read 函数告诉内核描述字缓冲区指针和缓冲区的大小、文件偏移及通知的方
 式，然后立即返回，当内核将数据拷贝到缓冲区后，再通知应用程序。
 
-<img src="D:\MyTxt\typoraPhoto\image-20230306175126070.png" alt="image-20230306175126070" style="zoom:67%;" />
 
 ```c
 /* Asynchronous I/O control block.  */
@@ -7376,7 +7328,6 @@ struct aiocb
 求。这一过程首先要通过 TCP 协议的三次握手建立与目标 Web 服务器的连接，然后 HTTP 协议生成针
 对目标 Web 服务器的 HTTP 请求报文，通过 TCP、IP 等协议发送到目标 Web 服务器上。
 
-<img src="D:\MyTxt\typoraPhoto\image-20230306222359507.png" alt="image-20230306222359507" style="zoom: 67%;" />
 
 #### HTTP
 
@@ -7397,22 +7348,23 @@ HTTP 协议定义 Web 客户端如何从 Web 服务器请求 Web 页面，以及
 本、成功或者错误代码、服务器信息、响应头部和响应数据。
 
 以下是 HTTP 请求/响应的步骤：
+
 1. 客户端连接到 Web 服务器
-    一个HTTP客户端，通常是浏览器，与 Web 服务器的 HTTP 端口（默认为 80 ）建立一个 TCP 套接
-    字连接。例如，http://www.baidu.com。（URL）
+   一个HTTP客户端，通常是浏览器，与 Web 服务器的 HTTP 端口（默认为 80 ）建立一个 TCP 套接
+   字连接。例如，http://www.baidu.com。（URL）
 2. 发送 HTTP 请求
-    通过 TCP 套接字，客户端向 Web 服务器发送一个文本的请求报文，一个请求报文由请求行、请求
-    头部、空行和请求数据 4 部分组成。
+   通过 TCP 套接字，客户端向 Web 服务器发送一个文本的请求报文，一个请求报文由请求行、请求
+   头部、空行和请求数据 4 部分组成。
 3. 服务器接受请求并返回 HTTP 响应
-    Web 服务器解析请求，定位请求资源。服务器将资源复本写到 TCP 套接字，由客户端读取。一个
-    响应由状态行、响应头部、空行和响应数据 4 部分组成。
+   Web 服务器解析请求，定位请求资源。服务器将资源复本写到 TCP 套接字，由客户端读取。一个
+   响应由状态行、响应头部、空行和响应数据 4 部分组成。
 4. 释放连接 TCP 连接
-    若 connection 模式为 close，则服务器主动关闭 TCP连接，客户端被动关闭连接，释放 TCP 连
-    接；若connection 模式为 keepalive，则该连接会保持一段时间，在该时间内可以继续接收请求;
+   若 connection 模式为 close，则服务器主动关闭 TCP连接，客户端被动关闭连接，释放 TCP 连
+   接；若connection 模式为 keepalive，则该连接会保持一段时间，在该时间内可以继续接收请求;
 5. 客户端浏览器解析 HTML 内容
-    客户端浏览器首先解析状态行，查看表明请求是否成功的状态代码。然后解析每一个响应头，响应
-    头告知以下为若干字节的 HTML 文档和文档的字符集。客户端浏览器读取响应数据 HTML，根据 
-    HTML 的语法对其进行格式化，并在浏览器窗口中显示。
+   客户端浏览器首先解析状态行，查看表明请求是否成功的状态代码。然后解析每一个响应头，响应
+   头告知以下为若干字节的 HTML 文档和文档的字符集。客户端浏览器读取响应数据 HTML，根据 
+   HTML 的语法对其进行格式化，并在浏览器窗口中显示。
 
 * 例如：在浏览器地址栏键入URL，按下回车之后会经历以下流程：
 
@@ -7424,7 +7376,6 @@ HTTP 协议定义 Web 客户端如何从 Web 服务器请求 Web 页面，以及
 5. 释放 TCP 连接;
 6. 浏览器将该 HTML 文本并显示内容。
 
-![image-20230306223145625](D:\MyTxt\typoraPhoto\image-20230306223145625.png)
 
 HTTP 协议是基于 TCP/IP 协议之上的应用层协议，基于 请求-响应 的模式。HTTP 协议规定，请求从客
 户端发出，最后服务器端响应该请求并返回。换句话说，肯定是先从客户端开始建立通信的，服务器端
@@ -7432,7 +7383,6 @@ HTTP 协议是基于 TCP/IP 协议之上的应用层协议，基于 请求-响�
 
 ##### 请求报文
 
-<img src="D:\MyTxt\typoraPhoto\image-20230307094705215.png" alt="image-20230307094705215" style="zoom: 67%;" />
 
 ```http
 GET / HTTP/1.1
@@ -7454,7 +7404,6 @@ Cache-Control: max-age=
 
 ##### 响应报文
 
-<img src="D:\MyTxt\typoraPhoto\image-20230307094824169.png" alt="image-20230307094824169" style="zoom:50%;" />
 
 ```http
 HTTP/1.1 200 OK
@@ -7489,7 +7438,7 @@ Transfer-Encoding: chunked
 虽然 RFC 2616 中已经推荐了描述状态的短语，例如"200 OK"，"404 Not Found"，但是WEB开发者仍
 然能够自行决定采用何种短语，用以显示本地化的状态描述或者自定义信息。
 
-<img src="D:\MyTxt\typoraPhoto\image-20230307095103231.png" alt="image-20230307095103231" style="zoom:67%;" />
+
 
 更多状态码：https://baike.baidu.com/item/HTTP%E7%8A%B6%E6%80%81%E7%A0%81/5053660?fr=aladdin
 
@@ -7506,13 +7455,13 @@ Transfer-Encoding: chunked
 
 * 使用同步 I/O（以 epoll_wait 为例）实现的 Reactor 模式的工作流程是
 
-<img src="D:\MyTxt\typoraPhoto\image-20230307103757704.png" alt="image-20230307103757704" style="zoom: 67%;" />
+
 
 1. 主线程往 epoll 内核事件表中注册 socket 上的读就绪事件。
 2. 主线程调用 epoll_wait 等待 socket 上有数据可读。
 3. 当 socket 上有数据可读时， epoll_wait 通知主线程。主线程则将 socket 可读事件放入请求队列。
 4. 睡眠在请求队列上的某个工作线程被唤醒，它从 socket 读取数据，并处理客户请求，然后往 epoll 
-内核事件表中注册该 socket 上的写就绪事件。
+   内核事件表中注册该 socket 上的写就绪事件。
 5. 当主线程调用 epoll_wait 等待 socket 可写。
 6. 当 socket 可写时，epoll_wait 通知主线程。主线程将 socket 可写事件放入请求队列。
 7. 睡眠在请求队列上的某个工作线程被唤醒，它往 socket 上写入服务器处理客户请求的结果。
@@ -7522,19 +7471,19 @@ Transfer-Encoding: chunked
 Proactor 模式将所有 I/O 操作都交给主线程和内核来处理（进行读、写），工作线程仅仅负责业务逻
 辑。使用异步 I/O 模型（以 aio_read 和 aio_write 为例）实现的 Proactor 模式的工作流程是：
 
-<img src="D:\MyTxt\typoraPhoto\image-20230307103954411.png" alt="image-20230307103954411" style="zoom:67%;" />
+
 
 1. 主线程调用 aio_read 函数向内核注册 socket 上的读完成事件，并告诉内核用户读缓冲区的位置，
-以及读操作完成时如何通知应用程序（这里以信号为例）。
+   以及读操作完成时如何通知应用程序（这里以信号为例）。
 2. 主线程继续处理其他逻辑。
 3. 当 socket 上的数据被读入用户缓冲区后，内核将向应用程序发送一个信号，以通知应用程序数据
-已经可用。
+   已经可用。
 4. 应用程序预先定义好的信号处理函数选择一个工作线程来处理客户请求。工作线程处理完客户请求
-后，调用 aio_write 函数向内核注册 socket 上的写完成事件，并告诉内核用户写缓冲区的位置，以
-及写操作完成时如何通知应用程序。
+   后，调用 aio_write 函数向内核注册 socket 上的写完成事件，并告诉内核用户写缓冲区的位置，以
+   及写操作完成时如何通知应用程序。
 5. 主线程继续处理其他逻辑。
 6. 当用户缓冲区的数据被写入 socket 之后，内核将向应用程序发送一个信号，以通知应用程序数据
-已经发送完毕。
+   已经发送完毕。
 7. 应用程序预先定义好的信号处理函数选择一个工作线程来做善后处理，比如决定是否关闭 socket。
 
 ##### 模拟 Proactor 模式
@@ -7544,14 +7493,14 @@ Proactor 模式将所有 I/O 操作都交给主线程和内核来处理（进行
 来要做的只是对读写的结果进行逻辑处理。
 使用同步 I/O 模型（以 epoll_wait为例）模拟出的 Proactor 模式的工作流程如下：
 
-<img src="D:\MyTxt\typoraPhoto\image-20230307104242846.png" alt="image-20230307104242846" style="zoom:67%;" />
+
 
 1. 主线程往 epoll 内核事件表中注册 socket 上的读就绪事件。
 2. 主线程调用 epoll_wait 等待 socket 上有数据可读。
 3. 当 socket 上有数据可读时，epoll_wait 通知主线程。主线程从 socket 循环读取数据，直到没有更
-多数据可读，然后将读取到的数据封装成一个请求对象并插入请求队列。
+   多数据可读，然后将读取到的数据封装成一个请求对象并插入请求队列。
 4. 睡眠在请求队列上的某个工作线程被唤醒，它获得请求对象并处理客户请求，然后往 epoll 内核事
-件表中注册 socket 上的写就绪事件。
+   件表中注册 socket 上的写就绪事件。
 5. 主线程调用 epoll_wait 等待 socket 可写。
 6. 当 socket 可写时，epoll_wait 通知主线程。主线程往 socket 上写入服务器处理客户请求的结果。
 
@@ -7570,7 +7519,7 @@ Proactor 模式将所有 I/O 操作都交给主线程和内核来处理（进行
   程将获得新任务的”接管权“，它可以从工作队列中取出任务并执行之，而其他子线程将继续睡眠在
   工作队列上
 
-<img src="D:\MyTxt\typoraPhoto\image-20230307105723891.png" alt="image-20230307105723891" style="zoom:67%;" />
+
 
 > 线程池中的线程数量最直接的限制因素是中央处理器(CPU)的处理器(processors/cores)的数量
 > N ：如果你的CPU是4-cores的，对于CPU密集型的任务(如视频剪辑等消耗CPU计算资源的任务)来
@@ -7664,108 +7613,10 @@ Webbench 是 Linux 上一款知名的、优秀的 web 性能压力测试工具�
 基本原理：Webbench 首先 fork 出多个子进程，每个子进程都循环做 web 访问测试。子进程把访问的
 结果通过pipe 告诉父进程，父进程做最终的统计结果。
 
-* 测试示例
-
-```c
- ./webbench -c 1000  -t  30   http://192.168.31.128:18888/index.html
-权限不够重新make一下
-参数：
-    -c 表示客户端数
-    -t 表示时间
-```
-
-
-
-## 6. 项目记录
-
-HTTP报文头
-
-```http
-读取到数据：GET / HTTP/1.1
-Host: 192.168.31.128:10000
-Connection: keep-alive
-Upgrade-Insecure-Requests: 1
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
-Accept-Encoding: gzip, deflate
-Accept-Language: zh-CN,zh;q=0.9,ar;q=0.8
-```
-
-
-
-### 1. 面试题
-
-1. read读取完成的标志？	
-
-   ```c
-   返回值1，返回值-1且errno=EAGAIN 或者EWOULDBLOCK
-       进行一些非阻塞(non-blocking)操作(对文件或socket)的时候续做read或者EWOULDBLOCK操作而没有数据可读。此时程序不会阻塞起来等待数据准备就绪返回，read函数会返回一个错误EAGAIN，提示你的应用程序现在没有数据可读请稍后再试
-       又例如，当一个系统调用(比如fork)因为没有足够的资源(比如虚拟内存)而执行失败，返回EAGAIN提示其再调用一次(也许下次就能成功)
-   ```
-
-2. epoll_wait得到的events中哪些是对方异常断开或者错误事件？
-
-   ```c
-   EPOLLRDHUP|EPOLLHUP|EPOLLERR
-       EPOLLRDHUP 对端关闭连接或者shutdown写入半连接
-   			 （程序里close()，shell下kill或ctr+c），触发EPOLLIN和EPOLLRDHUP
-   			表示对端关闭了写端，即半关闭状态，可以视为一种错误事件。当发生EPOLLRDHUP事件时，可以认为对端已经完成了写操作并关闭了连接，此时应该关闭套接字并且清理相关资源。在使用epoll时，通常可以将EPOLLRDHUP事件和EPOLLIN事件一起进行处理。
-       			
-       
-       EPOLLHUP 	表示读写都关闭。本端调用shutdown(SHUT_RDWR),应该是本端（server端）出错才触发的。
-   				对应的连接被挂起，通常是对方关闭了连接
-   				通常情况下EPOLLHUP表示的是本端挂断，造成这种事件出现的原因有很多，其中一种便是出现错误，更加细致的应该是和RST联系在一起
-       
-       EPOLLERR      服务器这边出错,只有采取动作时，才能知道是否对方异常。
-       
-     //****************************  
-   EPOLLHUP和EPOLLRDHUP都是表示连接异常断开的事件，但是它们的含义略有不同。
-   
-   EPOLLRDHUP则表示对端关闭了连接，即对端调用了close()函数。它只会在ET模式下才会触发。
-   EPOLLHUP表示对端连接断开，也可能是其他错误事件，比如一个本地socket调用了shutdown之后，再往这个socket上写数据，会返回一个RST。这种情况下也会触发EPOLLHUP事件。
-   在实际使用中，一般先判断EPOLLRDHUP，如果有则说明连接已经被对端关闭，如果没有再判断EPOLLHUP。
-       
-       -------------------------
-       对于 EPOLLERR和EPOLLHUP，不需要在epoll_event时针对fd作设置，一样也会触发
-       EPOLLERR和EPOLLHUP，是因为之前收到了对端close时发送的FIN 包，此时再给对端发送数据，对端会返回RST包
-       
-       对EPOLLRDHUP的处理应该放在EPOLLIN和EPOLLOUT前面，处理方式应该 是close掉相应的fd后，作其他应用层的清理动作
-   ```
-
-   
-
-3. 修改，定时清理超时的请求：
-
-   1. 定时器类 和 请求数据类 ，定时器链表；
-   2. ALARM定时处理：管道写端交给sig，定期写入定时信号，读端交给epoll，如果socket是fd[0]且多EPOLLIN，说明定时到了，判断是是不是ALARM，如果是最后处理（因为清理的优先级最小），最后处理的话就是调用回调函数去删除那个数据对象，删除socket在epoll上的绑定。
 
 ## Ubuntu一些小操作
 
 ### 配置类
-
-### 1.VScode配置 SSH连接Ubuntu
-
-* vscode扩展remote development下载
-
-* 远程资源管理器 设置远程连接 ，默认配置文件修改为虚拟机IP地址 用户密码
-
-* 生成宿主机SSH秘钥     ssh-keygen -t rsa 回车   生成位于C:\Users\klChen\.ssh的私钥和公钥
-
-* 生成虚拟机SSH秘钥    ssh-keygen -t rsa 
-
-* 配置秘钥 
-  cd .ssh
-  创建文件，复制宿主机秘钥vim authorized_keys
-
-ctrl+L 清空终端屏
-
-Ctrl+C中断了进程，返回到终端界面。
-
-Ctrl+Z挂起了进程，返回到终端界面。
-
-set nu在vim中设置行号
-
-创建文件 touch 创建文件夹 mkdir
 
 #### 文本文件上传
 
@@ -7875,7 +7726,6 @@ printenv
 
 终端设备：tty
 
-![image-20230227110412165](D:\MyTxt\typoraPhoto\image-20230227110412165.png)
 
 ###### 找函数
 
@@ -7905,6 +7755,8 @@ netstat
 2. 然后用-g调试编译.c文件
 3. 然后调试改文件，输入core-file core就能看到
 4. 这里系统版本不同，生成不出来Core文件
+
+bt打印堆栈
 
 #### Linux下的时间设置
 
@@ -7982,6 +7834,7 @@ perror("xxx")
 ~~~
 
  	sizeof 和strlen 有本质上的区别。sizeof 是C 语言的一种单目运算符，如++、–等，并不是函数，sizeof 的优先级为2 级，比/、% 等3 级运算符优先级高，sizeof以字节的形式给出操作数的存储空间的大小。而 strlen 是一个函数，是由 C 语言的标准库提供的。strlen 计算的 是字符串的长度。
+
 ```c
 sprintf 
     int sprintf( char *buffer, const char *format [, argument] … );
@@ -8031,1104 +7884,6 @@ readv和writev函数用于在一次函数调用中读、写多个非连续缓冲
 HTTP响应的时候配合writev(),写入响应头和体
     writev(m_sockfd,m_iv,m_iv_count);
 ```
-
-
-
-## 虚拟机设置
-
-IPv4 192.168.31.128
-
-##### 配置文件
-
-* 配置文件名以 *.cnf 为后缀,参考 windows下mysql的配置 : my.ini
-
-* 配置文件都在/etc下，在 /etc/init.d 下，是各个系统服务的启动脚本2 软件包搜索
-
-apt list | grep ssh
-
-apt search ssh --names-only
-
-3 删除软件包
-
-apt remove xxx 卸载软件包
-
-apt purge xxx 卸载软件包、并清除配置文件
-
-~~~shell
-echo命令的功能是在显示器上显示一段文字，一般起到一个提示的作用。此外，也可以直接在文件中写入要写的内容。也可以用于脚本编程时显示某一个变量的值，或者直接输出指定的字符串。
-1. -n : 表示输出之后不换行，直接显示新行的提示符
-2. -e : 表示对于转义字符按对应的方式进行处理。
-3. echo “想要的内容”> 文件名：
-将想要的内容覆盖到对应的文件当中去，文件当中之前的内容不复存在了，实际上是修改了原文件的内容。
-4. echo “想要的内容”>> 文件名
-将想要的内容追加到文件后，对文件之前的内容不修改，只进行增添，也叫追加重定
-~~~
-
-~~~c
-void *memcpy(void *dest, const void *src, size_t n);
-内存拷贝
-~~~
-
-## 小练习
-
-```c
-#ifndef THREAD_POOL_H
-#define THREAD_POLL_H
-
-#include "locker.h"
-#include <list>
-#include <pthread.h>
-#include <exception>
-#include <cstdio>
-//定义线程池模板类，方便复用
-template<typename T>
-class threadpool{
-public:
-    threadpool(int thread_number=8,int max_requests=10000);
-    ~threadpool();
-    bool append(T* request);    //添加到请求队列中
-    
-private:
-    //只能是静态函数
-    static void* work(void*arg);
-    void run();
-    
-private:
-    int m_thread_number; //线程数量
-    pthread_t* m_threads;//线程数组
-    int m_max_requests;//允许等待的最大量
-    std::list<T*> m_workqueue; //请求队列
-    locker m_queuelocker;//互斥锁
-    sem m_queuestat;// 信号量用来判断是否有任务需要处理
-    bool m_stop;//是否结束线程
-};
-
-template<typename T>
-threadpool<T>::threadpool(int thread_number,int max_requests):
-            m_thread_number(thread_number),m_max_requests(m_max_requests),
-            m_stop(false),m_threads(NULL) {
-        if((thread_number <= 0) || (max_requests <= 0)){
-            throw std::exception();
-        }
-        m_threads = new pthread_t[m_thread_number];
-        if(!m_threads){
-            throw std::exception();
-        }
-
-        //创建thread_number个线程，线程分离
-        for(int i=0;i!=thread_number;i++){
-            printf("create the %d thread\n",i);
-            //“值得一提的是，在c++程序中使用pthread_creat时，该函数的第3个参数必须指向一个静态函数”
-            //第四个参数 -向work传参this 用于调用非静态成员
-            if(pthread_create(m_threads+i,NULL,work,this) != 0){
-                delete[] m_threads;
-                throw std::exception();
-            }
-
-            if(pthread_detach(m_threads[i]) != 0){
-                delete[] m_threads;
-                throw std::exception();
-            }
-        }
-}
-
-template<typename T>
-threadpool<T>::~threadpool(){
-    delete[] m_threads;
-    m_stop = true;
-}
-
-template<typename T>
-bool threadpool<T>::append(T* request){
-    m_queuelocker.lock();
-    if(m_workqueue.size() > m_max_requests){
-        m_queuelocker.unlock();
-        return false;
-    }
-    m_workqueue.push_back(request);
-    m_queuelocker.unlock();
-    m_queuestat.post();
-    return true;
-}
-
-template<typename T>
-void* threadpool<T>::work(void*arg){
-    //静态函数不能访问类内非静态成员,可以传入this指针
-    threadpool *pool = (threadpool*) arg;
-    pool->run();
-    return pool;
-}
-
-template<typename T>
-void threadpool<T>::run(){
-    while(!m_stop){
-        //P
-        m_queuestat.wait();
-        //上锁
-        m_queuelocker.lock();
-        //其实这里wait会阻塞
-        if(m_workqueue.empty()){
-            m_queuelocker.unlock();
-            continue;
-        }
-
-        T* request = m_workqueue.front();
-        m_workqueue.pop_front();
-        //解锁
-        m_queuelocker.unlock();
-
-        if(!request){
-            continue;
-        }
-
-        request->process();
-    }
-    
-}
-
-#endif
-
-```
-
-```c
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <sys/epoll.h>
-#include <signal.h>
-#include "locker.h"
-#include "thread_pool.h"
-#include "http_conn.h"
-
-#define MAX_FD 65535 //最大文件描述符
-#define MAX_EVENTS_NUMBER 10000 //监听的最大的事件数量
-
-//将文件描述符添加到epoll中
-extern void addfd(int epollfd,int fd,bool one_shoot);
-//将文件描述符从epoll中删除
-extern void removefd(int epollfd,int fd);
-//修改文件描述符
-extern void modfd(int epollfd,int fd,int ev);
-
-//添加信号捕捉 
-void addsig(int sig,void(handler)(int)){
-    struct sigaction sa;
-    //清空
-    memset(&sa,'\0',sizeof(sa));
-    //设置回调函数
-    sa.sa_handler = handler;
-    sigfillset(&sa.sa_mask);
-    //注册信号捕捉
-    sigaction(sig,&sa,NULL);
-}
-
-
-int main( int argc, char* argv[] ) {
-    
-    if( argc <= 1 ) {
-        printf( "usage: %s port_number\n", basename(argv[0]));
-        return 1;
-    }
-
-    //获取端口号
-    int port =atoi(argv[1]);
-
-    //对SIGPIE信号进行处理
-    addsig(SIGPIPE,SIG_IGN);
-
-    //初始化线程池
-    threadpool<http_conn> *pool = NULL;
-    try{
-        pool = new threadpool<http_conn>;
-    }catch(...){
-        exit(-1);
-    }
-
-    //创建一个数组，用于保存所有的客户端信息
-    http_conn *users = new http_conn[MAX_FD];
-    
-    //生成监听的socket
-    int listenfd = socket(AF_INET,SOCK_STREAM,0);
-    
-    //设置端口复用
-    int reuse = 1;
-    setsockopt(listenfd,SOL_SOCKET,SO_REUSEADDR,&reuse,sizeof(reuse));
-
-    //绑定
-    struct sockaddr_in address;
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(port);
-    bind(listenfd,(struct sockaddr*)&address,sizeof(address));
-
-    //监听
-    listen(listenfd,5); 
-
-    //创建epoll对象,事件数组，之后添加
-    epoll_event events[MAX_EVENTS_NUMBER];
-    int epollfd = epoll_create(100);
-
-    //监听文件描述符添加到epoll实例当中
-    addfd(epollfd,listenfd,false);
-    http_conn::m_epollfd = epollfd;
-
-    while(1){
-        int num = epoll_wait(epollfd,events,MAX_EVENTS_NUMBER,-1);
-        if((num < 0) && (errno != EINTR)){
-            printf("epoll failure\n");
-            break;
-        }
-
-        //循环遍历事件数组
-        for(int i = 0; i < num; i++){
-
-            int sockfd = events[i].data.fd;
-
-            if(sockfd == listenfd){
-                //有客户端连接进来
-                printf("new client\n");
-                struct sockaddr_in client_address;
-                socklen_t client_addlen = sizeof(client_address);
-
-                int connfd = accept(listenfd,(struct sockaddr*)&client_address,&client_addlen);
-                if(connfd == -1){
-                    printf("error is: %d\n",errno);
-                    continue;
-                }
-                if(http_conn::m_user_count >=MAX_FD){
-                    //目前连接数满了
-                    close(connfd);
-                    continue;
-                }
-                //将新的客户端初始化，放到数组中
-                users[connfd].init(connfd,client_address); 
-
-            }else if(events[i].events & (EPOLLRDHUP|EPOLLHUP|EPOLLERR)){
-                //对方异常断开或者错误等事件
-                users[sockfd].close_conn();
-                printf("EPOLLRDHUP|EPOLLHUP|EPOLLERR while epoll\n");
-
-            }else if(events[i].events & EPOLLIN){
-                //读事件发生
-                if(users[sockfd].read()){
-                    //一次性把数据读完
-                    pool->append(users+sockfd);
-                    printf("read ok\n");
-                }else{
-                    users[sockfd].close_conn();
-                }
-            }else if(events[i].events & EPOLLOUT){
-                if(!users[sockfd].write()){
-                    //把respond写入客户端端fd后，把该客户端fd从epoll中删除
-                    users[sockfd].close_conn();
-                }
-                printf("write response ok\n");
-                printf("-----------------------\n");
-            }
-        }
-
-
-
-    }
-    close(epollfd);
-    close(listenfd);
-    delete[] users;
-    delete pool;
-
-    return 0;
-}
-```
-
-```c
-//使用#ifndef可以避免以下错误:如果在.h文件中定义了全局变量,一个C文件包含了.h文件多次,如果不加#ifndef宏定义,会出现变量重复定义的错误;如果加了#ifndef则不会出现这种错误
-#ifndef LOCKER_H
-#define LOCKER_H
-
-#include <pthread.h>
-#include <exception>
-#include <semaphore.h>
-//线程同步封装类
-
-//互斥锁类
-class locker{
-public:
-    locker(){
-        if(pthread_mutex_init(&m_mutex,NULL) != 0){
-            throw std::exception();
-        }
-    }
-    ~locker(){
-        pthread_mutex_destroy(&m_mutex);
-    }
-    inline bool lock(){
-        return pthread_mutex_lock(&m_mutex) == 0; 
-    }
-    inline bool unlock(){
-        return pthread_mutex_unlock(&m_mutex) == 0;
-    }
-    pthread_mutex_t& get(){
-        return m_mutex;
-    } 
-
-private:
-    pthread_mutex_t m_mutex;
-};
-
-//条件变量类
-class cond{
-public:
-    cond(){
-        if(pthread_cond_init(&m_cond,NULL) != 0){
-            throw std::exception();
-        }
-    }
-    ~cond(){
-        pthread_cond_destroy(&m_cond);
-    }
-
-    inline bool wait(pthread_mutex_t* mutex){
-        return pthread_cond_wait(&m_cond,mutex)==0;
-    }
-
-    inline bool timewait(pthread_mutex_t* mutex,struct timespec t){
-        return pthread_cond_timedwait(&m_cond,mutex,&t)==0;
-    }
-
-    inline bool signal() {
-        return pthread_cond_signal(&m_cond)==0;
-    }
-
-    inline bool broadcast(pthread_mutex_t mutex){
-        return pthread_cond_broadcast(&m_cond)==0;
-    }
-
-private:
-    pthread_cond_t m_cond;
-};
-
-//信号量类
-class sem{
-public:
-    sem()=default;
-    sem(int num){
-        if(sem_init(&m_sem,0,num) != 0){
-            throw std::exception();
-        }
-    }
-    ~sem(){
-        sem_destroy(&m_sem);
-    }
-    //加锁P
-    bool wait(){
-        return sem_wait(&m_sem)==0;
-    }
-    //减锁V
-    bool post(){
-        return sem_post(&m_sem)==0;
-    }
-private:
-    sem_t m_sem;
-};
-
-#endif
-```
-
-```c
-#ifndef HTTP_CONNECTION_H
-#define HTTP_CONNECTION_H
-
-#include <sys/epoll.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <stdarg.h>
-#include <errno.h>
-#include <sys/uio.h>
-#include <string.h>
-#include "locker.h"
-
-
-class http_conn{
-public:
-
-    static int m_epollfd;    //所有socket事件都被注册到同一个epollfd上
-    static int m_user_count; //统计用户的数量
-    static const int FILENAME_LEN = 200;         //文件名的最大长度
-    static const int READ_BUFFER_SIZE = 2048;    //读缓冲区的大小
-    static const int WRITE_BUFFER_SIZE =1024;    //写缓冲区大小 
-
-    // HTTP请求方法，这里只支持GET
-    enum METHOD {GET = 0, POST, HEAD, PUT, DELETE, TRACE, OPTIONS, CONNECT};
-    
-    /*
-        解析客户端请求时，主状态机的状态
-        CHECK_STATE_REQUESTLINE:当前正在分析请求行
-        CHECK_STATE_HEADER:当前正在分析头部字段
-        CHECK_STATE_CONTENT:当前正在解析请求体
-    */
-    enum CHECK_STATE { CHECK_STATE_REQUESTLINE = 0, CHECK_STATE_HEADER, CHECK_STATE_CONTENT };
-    
-    /*
-        服务器处理HTTP请求的可能结果，报文解析的结果
-        NO_REQUEST          :   请求不完整，需要继续读取客户数据
-        GET_REQUEST         :   表示获得了一个完成的客户请求
-        BAD_REQUEST         :   表示客户请求语法错误
-        NO_RESOURCE         :   表示服务器没有资源
-        FORBIDDEN_REQUEST   :   表示客户对资源没有足够的访问权限
-        FILE_REQUEST        :   文件请求,获取文件成功
-        INTERNAL_ERROR      :   表示服务器内部错误
-        CLOSED_CONNECTION   :   表示客户端已经关闭连接了
-    */
-    enum HTTP_CODE { NO_REQUEST, GET_REQUEST, BAD_REQUEST, NO_RESOURCE, FORBIDDEN_REQUEST, FILE_REQUEST, INTERNAL_ERROR, CLOSED_CONNECTION };
-    
-    // 从状态机的三种可能状态，即行的读取状态，分别表示
-    // 1.读取到一个完整的行 2.行出错 3.行数据尚且不完整
-    enum LINE_STATUS { LINE_OK = 0, LINE_BAD, LINE_OPEN };
-
-    http_conn(){}
-    ~http_conn(){}
-
-    void init(int sockfd,const sockaddr_in &add);   //初始化新收到的客户端的连接
-    void close_conn();
-    bool read();    //非阻塞的读
-    bool write();   //非阻塞的写
-
-    void process();     //处理用户请求
-  
-private:
-
-    void init();    //初始化连接其余的数据
-    HTTP_CODE process_read();                  //解析HTTP请求
-    bool process_write(HTTP_CODE ret);         //写入HTTP响应
-    
-    
-    //这组函数被process_read调用以分析HTTP请求
-    HTTP_CODE parse_request_line(char *text);       //解析HTTP请求首行
-    HTTP_CODE parse_headers(char *text);            //解析HTTP头部
-    HTTP_CODE parse_content(char *text);            //解析HTTP内容
-    LINE_STATUS parse_line();                       //解析行  
-    inline char* get_line() {return m_read_buf + m_start_line;}
-    HTTP_CODE do_request();
-
- 
-    //这组函数被process_read调用以填充HTTP应答
-    void unmap();
-    bool add_response(const char* format,...);
-    bool add_content(const char* content,...);
-    bool add_content_type();
-    bool add_status_line(int status,const char*title);
-    bool add_headers(int content_length);
-    bool add_content_length(int content_length);
-    bool add_linger();
-    bool add_blank_line();
-
-
-
-private:
-    int m_sockfd;   //该HTTP连接的socket
-    sockaddr_in m_address;  //通信的socket地址
-
-    char m_read_buf[READ_BUFFER_SIZE];      //读缓冲区
-    int m_read_idx;                         //标识读缓冲区中已经写入的数据的最后一个字节的下一个
-    
-    char m_real_file[FILENAME_LEN];         // 客户请求的目标文件的完整路径，其内容等于 doc_root + m_url, doc_root是网站根目录
-    int m_check_index;                      //当前正在分析的字符在缓冲区的位置
-    int m_start_line;                       //当前正在解析的行的起始位置  
-    char *m_url;                            //目标文件名
-    char *m_version;                        //协议版本，只支持HTTP1.1  
-    char *m_host;                            //主机名
-    bool m_linger;                          //HTTP是否保持连接 keep alive
-    int m_content_length;                   //HTTP请求的消息总长度
-
-    METHOD m_method;                         //请求方法
-    CHECK_STATE m_check_state;               //主状态机当前所处的状态
-
-    char m_write_buf[WRITE_BUFFER_SIZE];      //写缓冲区
-    int m_write_idx;                          //写缓冲区的待处理字节
-    char* m_file_address;                     //客户请求的目标地址
-    struct stat m_file_stat;                  //目标文件的状态
-    struct iovec m_iv[2];                      //采用writev来执行写操作，所以定义下面两个成员，其中m_iv_count表示被写内存块的数量。 
-    int m_iv_count;
-
-    int bytes_to_send;                      //将要发送的数据的字节数
-    int bytes_have_send;                    //已经发送的字节数
-
-};
-
-#endif
-
-```
-
-```c
-
-#include "http_conn.h"
-
-// 定义HTTP响应的一些状态信息
-const char* ok_200_title = "OK";
-const char* error_400_title = "Bad Request";
-const char* error_400_form = "Your request has bad syntax or is inherently impossible to satisfy.\n";
-const char* error_403_title = "Forbidden";
-const char* error_403_form = "You do not have permission to get file from this server.\n";
-const char* error_404_title = "Not Found";
-const char* error_404_form = "The requested file was not found on this server.\n";
-const char* error_500_title = "Internal Error";
-const char* error_500_form = "There was an unusual problem serving the requested file.\n";
-
-// 网站的根目录
-const char* doc_root = "/home/klchen/WinToUbuntu/WebServer/resources";
-
-// 类内静态变量初始化
-int http_conn::m_user_count = 0;
-int http_conn::m_epollfd = -1;
-
-//设置fd非阻塞
-int setnonblocking(int fd){
-    int old_flag = fcntl(fd,F_GETFL);
-    int new_flag = old_flag | O_NONBLOCK;
-    fcntl(fd,F_SETFL,new_flag);
-    return new_flag;
-}
-
-//将需要监听的文件描述符添加到epoll中
-void addfd(int epollfd,int fd,bool one_shoot){
-    struct epoll_event event;
-    event.data.fd = fd;
-    //event.events = EPOLLIN ||EPOLLRDHUP;
-    event.events = EPOLLIN |EPOLLRDHUP;
-    //设置一个Socket连接同时只能触发一次，防止读取的时候更新又开一个线程处理
-    if(one_shoot){
-        event.events|=EPOLLONESHOT;
-    }
-    epoll_ctl(epollfd,EPOLL_CTL_ADD,fd,&event);
-
-    //设置文件描述符非阻塞
-    setnonblocking(fd);
-}
-
-//将监听文件描述符从epoll中删除
-void removefd(int epollfd,int fd){
-    epoll_ctl(epollfd,EPOLL_CTL_DEL,fd,0);
-    close(fd);
-}
-
-//修改文件描述符 ，修改socket上的ONESHOOT事件，以确保下一次可读的时候，EPOLL时间只触发一次
-void modfd(int epollfd,int fd,int ev){
-    epoll_event event;
-    event.data.fd = fd;
-    //为什么要添加 EPOLLET|EPOLLRDHUP？？？
-    event.events = ev|EPOLLONESHOT|EPOLLET|EPOLLRDHUP;
-    epoll_ctl(epollfd,EPOLL_CTL_MOD,fd,&event);
-}
-
-//初始化连接
-void http_conn::init(int sockfd, const sockaddr_in &add){
-    m_sockfd = sockfd;
-    m_address = add;
-
-    //端口复用
-    int reuse = 1;
-    setsockopt(sockfd,SOL_SOCKET,SO_REUSEADDR,&reuse,sizeof(reuse));
-    
-    //新的客户端fd添加到epoll对象中
-    addfd(m_epollfd,sockfd,true);
-    m_user_count++;
-
-    //其他部分的初始化
-    init();
-}
-
-//其他部分的初始化
-void http_conn::init()
-{
-    m_check_state = CHECK_STATE_REQUESTLINE;    //初始化状态为解析请求首行
-    m_check_index = 0;
-    m_start_line = 0;
-    m_read_idx = 0;
-    m_url = 0;    
-    m_version = 0;     
-    m_method = GET;
-    bzero(m_read_buf,READ_BUFFER_SIZE);
-    m_host = 0;
-    m_linger = false;
-    bytes_to_send = 0;
-    bytes_have_send = 0;
-    m_content_length = 0;
-    m_read_idx = 0;
-    m_write_idx = 0;
-
-    bzero(m_read_buf,READ_BUFFER_SIZE);
-    bzero(m_write_buf,WRITE_BUFFER_SIZE);
-    bzero(m_read_buf,FILENAME_LEN);
-}
-
-//关闭连接
-void http_conn::close_conn(){
-    if(m_epollfd != -1){
-        removefd(m_epollfd,m_sockfd);
-        m_sockfd = -1;
-        m_user_count--;//关闭一个连接
-    }
-
-}
-
-bool http_conn::read()
-{
-    //printf("一次性读完数据\n");
-    if(m_read_idx >= READ_BUFFER_SIZE){
-        return false;
-    }
-
-    int bytes_read = 0;
-    while(1){
-        //第四个参数设置0，表示阻塞读取
-        bytes_read = recv(m_sockfd,m_read_buf+m_read_idx,READ_BUFFER_SIZE-m_read_idx,0);
-        if(bytes_read == -1){
-            if((errno == EAGAIN)||(errno ==EWOULDBLOCK)){
-                //非阻塞情况下，没数据可读了
-                break;
-            }
-            return false;
-        }else if(bytes_read == 0){
-            //对方关闭
-            return false;
-        }else if(bytes_read > 0){
-            m_read_idx += bytes_read;
-        }
-    }
-    printf("%s\n",m_read_buf);
-    return true;
-}
-
-
-/* 当得到一个完整、正确的HTTP请求时，我们就分析目标文件的属性，
- 如果目标文件存在、对所有用户可读，且不是目录，则使用mmap将其
- 映射到内存地址m_file_address处，并告诉调用者获取文件成功
-*/
-http_conn::HTTP_CODE http_conn::do_request()
-{   
-    //或得路径+文件名
-    strcpy(m_real_file,doc_root);
-    int len = strlen(doc_root);
-    strncpy(m_real_file+len,m_url,FILENAME_LEN-1);
-
-    //获取文件权限
-    if(stat(m_real_file,&m_file_stat) < 0){
-        return  NO_RESOURCE;
-    }
-    
-    if(!(m_file_stat.st_mode & S_IROTH)){
-        return FORBIDDEN_REQUEST;
-    }
-
-    //判断是否是目录
-    if(S_ISDIR(m_file_stat.st_mode)){
-        return BAD_REQUEST;
-    }
-
-    //只读方式打开文件
-    int fd = open(m_real_file,O_RDONLY);
-
-    //创建内存映射，写入
-    m_file_address = (char *)mmap(NULL,m_file_stat.st_size,PROT_READ,MAP_PRIVATE,fd,0);
-    close(fd);
-    return FILE_REQUEST;
-}
-
-// 主状态机 解析请求
-http_conn::HTTP_CODE http_conn::process_read()
-{
-    LINE_STATUS line_status = LINE_OK;
-    HTTP_CODE ret = NO_REQUEST;
-
-    char *text = 0;
-    while(((m_check_state == CHECK_STATE_CONTENT) &&(line_status == LINE_OK))
-        ||((line_status = parse_line()) == LINE_OK)){
-    //解析到了一行完整的数据，或者解析到了一行完整的请求体
-        //获取一行数据
-        text = get_line();
-        m_start_line = m_check_index;
-        printf("got 1 http line: %s\n",text);
-
-        switch (m_check_state)
-        {
-            case CHECK_STATE_REQUESTLINE:{
-                ret = parse_request_line(text);
-                if(ret == BAD_REQUEST){
-                    return BAD_REQUEST;
-                }
-                break;
-            }
-            case CHECK_STATE_HEADER:{
-                ret = parse_headers(text);
-                if(ret == BAD_REQUEST){
-                    return BAD_REQUEST;
-                }else if(ret == GET_REQUEST){
-                    //头部解析完了，得到一个完整的客户请求
-                    return do_request();
-                }
-                break;
-            }
-            case CHECK_STATE_CONTENT:{
-                ret = parse_content(text);
-                if(ret == GET_REQUEST){
-                    return do_request();
-                }
-                line_status = LINE_OPEN;            
-                break;
-            }
-            default:{
-                return INTERNAL_ERROR;
-            }
-        }
-    }
-    return NO_REQUEST;
-}
-
-//解析HTTP请求行，获得请求方法，目标URL，HTTP版本
-http_conn::HTTP_CODE http_conn::parse_request_line(char *text)
-{   //读取到数据：GET /index.html HTTP/1.1
-        //strpbrk是在源字符串（s1）中找出最先含有搜索字符串（s2）中任一字符的位置并返回，若找不到则返回空指针
-    m_url = strpbrk(text," \t");    //text中空格和\t哪个先得到
-    if(!m_url){
-        return BAD_REQUEST;
-    }
-        //strcasecmp用来比较参数s1和s2字符串前n个字符，比较时会自动忽略大小写的差异,strncasecmp有n指定比较最长位置    
-    *m_url++ = '\0';///index.html HTTP/1.1
-    char *method = text;//GET /index.html HTTP/1.1
-
-    if(strcasecmp(method,"GET") == 0){
-        m_method = GET;
-    }else{
-        return BAD_REQUEST;
-    }  
-    
-    m_version = strpbrk(m_url," \t");
-    if(!m_version){
-        return BAD_REQUEST;
-    }
-    *m_version++ = '\0';//HTTP/1.1
-    
-    if(strcasecmp(m_version,"HTTP/1.1")!= 0 ){
-        return BAD_REQUEST;
-    }
-    //http://192.168.31.128:10000/index.html
-    if(strncasecmp(m_url,"http://",7) == 0){
-        m_url+=7;// 192.168.31.128:10000/index.html
-        m_url=strchr(m_url,'/'); // /index.html
-    }
-
-    if(!m_url || (m_url[0] !='/')){
-        return BAD_REQUEST;
-    }
-
-    m_check_state = CHECK_STATE_HEADER; //主状态机检查状态变为请求头
-
-    return NO_REQUEST;
-}
-
-http_conn::HTTP_CODE http_conn::parse_headers(char *text)
-{
-    //遇到空行，表示头部字段解析完成
-    if(text[0] == '\0'){
-        //如果HTTP请求有消息体，还需要读取m_content_length字节的消息体
-        //状态机转移到CHECK_STATE_CONTENT状态
-        if(m_content_length != 0){
-            m_check_state = CHECK_STATE_CONTENT;
-            return NO_REQUEST;
-        }
-        //否则，说明已经得到完整的HTTP请求,继续获取请求
-        return GET_REQUEST;
-    }else if(strncasecmp(text,"Connection:",11)==0){
-        //处理Connection:头部字段 Connection: keep-alive
-        text += 11;
-        text += strspn(text," \t");
-        if( strcasecmp(text,"keep-alive")==0){
-            m_linger = true;
-        }
-    } else if ( strncasecmp( text, "Content-Length:", 15 ) == 0 ) {
-        // 处理Content-Length头部字段
-        text += 15;
-        text += strspn( text, " \t" );
-        m_content_length = atol(text);
-    } else if ( strncasecmp( text, "Host:", 5 ) == 0 ) {
-        // 处理Host头部字段
-        text += 5;
-        text += strspn( text, " \t" );
-        m_host = text;
-    } else {
-        printf( "oop! unknow header %s\n", text );
-    }
-    return NO_REQUEST;
-}
-
-//本项目没有真正解析HTTP请求的消息体，只是判断它是否被完整的读入了
-http_conn::HTTP_CODE http_conn::parse_content(char *text)
-{
-    if( m_read_idx >=(m_content_length + m_check_index)){
-        text[m_content_length] = '\0';
-        return GET_REQUEST;
-    }
-    return HTTP_CODE();
-}
-
-// 次状态机，解析行
-http_conn::LINE_STATUS http_conn::parse_line()
-{
-    char temp;
-    for(;m_check_index < m_read_idx;++m_check_index){
-        temp = m_read_buf[m_check_index];
-        //考虑Linux的换行符是\r\n
-        if(temp == '\r'){
-            //读到换行符的清空
-            if((m_check_index + 1)== m_read_idx){
-                //到缓存最后了
-                return LINE_OPEN;
-            }else if(m_read_buf[m_check_index+1]=='\n'){
-                //完整解析一行了
-                m_read_buf[m_check_index++] = '\0';
-                m_read_buf[m_check_index++] = '\0';
-                return LINE_OK;
-            }
-            return LINE_BAD;
-        }else if(temp == '\n'){
-            //读了一半换行符
-            if((m_check_index > 1) && (m_read_buf[m_check_index -1] == '\r')){
-                m_read_buf[m_check_index -1] ='\0';
-                m_read_buf[m_check_index++] = '\0';
-                return LINE_OK;
-            }
-            return LINE_BAD;   
-        }
-
-    }
-
-    return LINE_OK;
-}
-
-//向缓冲区写入待发送的数据
-bool http_conn::add_response(const char *format, ...)
-{   
-    if(m_write_idx >= WRITE_BUFFER_SIZE){
-        return false;
-    }
-    va_list arg_list;
-    va_start(arg_list,format);
-    int len = vsnprintf(m_write_buf+m_write_idx,WRITE_BUFFER_SIZE-1-m_write_idx,format,arg_list);
-    if(len >= (WRITE_BUFFER_SIZE-1-m_write_idx)){
-        return false;
-    }
-    m_write_idx += len;
-    va_end(arg_list);
-    return true;
-}
-
-bool http_conn::add_content(const char *content, ...)
-{
-    return add_response( "%s", content );
-}
-
-bool http_conn::add_content_type()
-{
-    return add_response("Content-Type:%s\r\n", "text/html");
-}
-
-bool http_conn::add_status_line(int status, const char *title)
-{
-    return add_response("%s %d %s\r\n","HTTP/1.1",status,title);
-}
-
-bool http_conn::add_headers(int content_length)
-{
-    
-    return (
-        add_content_length(content_length) &&
-        add_content_type()&&
-        add_linger()&&
-        add_blank_line() 
-    );
-}
-
-bool http_conn::add_content_length(int content_length)
-{
-    return add_response("Content-Length: %d\r\n",content_length);
-}
-
-void http_conn::unmap()
-{
-    if(m_file_address){
-        munmap(m_file_address,m_file_stat.st_size);
-        m_file_address = 0;
-    }
-}
-
-//写HTTP响应
-bool http_conn::write()
-{
-    int temp =0;
-    //写完了
-    if(bytes_to_send  == 0){
-        modfd(m_epollfd,m_sockfd,EPOLLIN);
-        init();
-        return true;
-    }
-
-    while(1){
-        //分散写，有两个内存块，响应头+体
-        temp = writev(m_sockfd,m_iv,m_iv_count);
-        if(temp < -1){
-             // 如果TCP写缓冲没有空间，则等待下一轮EPOLLOUT事件，虽然在此期间，
-            // 服务器无法立即接收到同一客户的下一个请求，但可以保证连接的完整性。
-            if(errno == EAGAIN){
-                modfd(m_epollfd,m_sockfd,EPOLLOUT);
-            }
-            //释放内存映射
-            unmap();
-            return false;
-        }
-
-        bytes_have_send += temp;//bytes_have_send不计较不同内存块的
-        bytes_to_send -= temp;
-        
-        if(bytes_have_send >= m_iv[0].iov_len){
-            m_iv[0].iov_len = 0;
-            m_iv[1].iov_base = m_file_address+(bytes_have_send-m_write_idx);
-            m_iv[1].iov_len = bytes_to_send;
-        }else{
-            m_iv[0].iov_base = m_write_buf + bytes_have_send;
-            m_iv[0].iov_len = m_iv[0].iov_len-temp;
-        }
-
-        if(bytes_to_send <= 0){
-            //没有数据可以发了
-            unmap();
-            modfd(m_epollfd,m_sockfd,EPOLLIN);
-
-            if(m_linger){
-                init();
-                return true;
-            }else{
-                return false;
-            }
-        }
-    }
-}
-
-bool http_conn::add_linger()
-{
-    return add_response( "Connection: %s\r\n", ( m_linger == true ) ? "keep-alive" : "close" );
-}
-
-bool http_conn::add_blank_line()
-{
-    return add_response( "%s", "\r\n" );
-}
-
-//根据服务器处理HTTP请求的结果，决定返回给客户端的内容
-bool http_conn::process_write(HTTP_CODE ret)
-{    
-    switch (ret)
-    {
-    case INTERNAL_ERROR:
-        add_status_line(500,error_500_title);
-        add_headers(strlen(error_500_form));
-        if( ! add_content(error_500_form)){
-            return false;
-        }
-        break;
-    case BAD_REQUEST:
-        add_status_line( 400, error_400_title );
-        add_headers( strlen( error_400_form ) );
-        if ( ! add_content( error_400_form ) ) {
-            return false;
-        }
-        break;
-    case NO_RESOURCE:
-        add_status_line( 404, error_404_title );
-        add_headers( strlen( error_404_form ) );
-        if ( ! add_content( error_404_form ) ) {
-            return false;
-        }
-        break;
-    case FORBIDDEN_REQUEST:
-        add_status_line( 403, error_403_title );
-        add_headers(strlen( error_403_form));
-        if ( ! add_content( error_403_form ) ) {
-            return false;
-        }
-        break;
-    case FILE_REQUEST:
-        add_status_line(200,ok_200_title);
-        add_headers(m_file_stat.st_size);
-        //存储用于分写的内存位置
-        m_iv[0].iov_base =  m_write_buf;
-        m_iv[0].iov_len = m_write_idx;
-        m_iv[1].iov_base = m_file_address;
-        m_iv[1].iov_len = m_file_stat.st_size;
-        m_iv_count = 2;
-
-        bytes_to_send = m_write_idx + m_file_stat.st_size;
-
-        if(m_write_buf){
-            printf("%s",m_write_buf); 
-        }else{
-            printf("m_write_buf is empty!\n"); 
-        }          
-            return true;
-    default:
-        return false;
-    }
-
-    m_iv[0].iov_base = m_write_buf;
-    m_iv[0].iov_len = m_write_idx;
-    m_iv_count = 1;
-    bytes_have_send = m_write_idx;
-
-    if(m_write_buf){
-        printf("%s",m_write_buf); 
-    }else{
-        printf("m_write_buf is empty!\n"); 
-    }      
-    
-    return true;
-}
-
-//有线程池中的工作线程调用，处理HTTP请求的入口函数
-void http_conn::process()
-{   
-    //解析HTTP请求
-    HTTP_CODE read_ret = process_read();
-    if(read_ret == NO_REQUEST){
-        //请求不完整，重新修改请求
-        modfd(m_epollfd,m_sockfd,EPOLLIN);
-        return;
-    }
-    //生成响应      
-    bool write_ret = process_write(read_ret);
-    if(!write_ret){
-        close_conn();
-    }
-    printf("Generate response sucessfully\n");
-    modfd(m_epollfd,m_sockfd,EPOLLOUT);
-}
-```
-
-
-
-
 
 
 
